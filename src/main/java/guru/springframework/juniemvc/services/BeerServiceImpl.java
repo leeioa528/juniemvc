@@ -35,4 +35,9 @@ public class BeerServiceImpl implements BeerService {
     public Beer saveBeer(Beer beer) {
         return beerRepository.save(beer);
     }
+
+    @Override
+    public void deleteBeerById(Integer id) {
+        beerRepository.deleteById(id);
+    }
 }
