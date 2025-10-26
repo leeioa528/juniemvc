@@ -1,6 +1,8 @@
 package guru.springframework.juniemvc.services;
 
 import guru.springframework.juniemvc.entities.Beer;
+import guru.springframework.juniemvc.mappers.BeerMapper;
+import guru.springframework.juniemvc.models.BeerDto;
 import guru.springframework.juniemvc.repositories.BeerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,14 +27,26 @@ class BeerServiceImplTest {
     @Mock
     BeerRepository beerRepository;
 
+    @Mock
+    BeerMapper beerMapper;
+
     @InjectMocks
     BeerServiceImpl beerService;
 
     Beer testBeer;
+    BeerDto testBeerDto;
 
     @BeforeEach
     void setUp() {
         testBeer = Beer.builder()
+                .id(1)
+                .beerName("Test Beer")
+                .beerStyle("IPA")
+                .upc("123456")
+                .price(new BigDecimal("12.99"))
+                .quantityOnHand(100)
+                .build();
+        testBeerDto = BeerDto.builder()
                 .id(1)
                 .beerName("Test Beer")
                 .beerStyle("IPA")
@@ -46,9 +60,10 @@ class BeerServiceImplTest {
     void getAllBeers() {
         // Given
         when(beerRepository.findAll()).thenReturn(Arrays.asList(testBeer));
+        when(beerMapper.toDto(testBeer)).thenReturn(testBeerDto);
 
         // When
-        List<Beer> beers = beerService.getAllBeers();
+        List<BeerDto> beers = beerService.getAllBeers();
 
         // Then
         assertThat(beers).hasSize(1);
@@ -60,9 +75,10 @@ class BeerServiceImplTest {
     void getBeerById() {
         // Given
         when(beerRepository.findById(1)).thenReturn(Optional.of(testBeer));
+        when(beerMapper.toDto(testBeer)).thenReturn(testBeerDto);
 
         // When
-        Optional<Beer> beerOptional = beerService.getBeerById(1);
+        Optional<BeerDto> beerOptional = beerService.getBeerById(1);
 
         // Then
         assertThat(beerOptional).isPresent();
@@ -76,7 +92,7 @@ class BeerServiceImplTest {
         when(beerRepository.findById(1)).thenReturn(Optional.empty());
 
         // When
-        Optional<Beer> beerOptional = beerService.getBeerById(1);
+        Optional<BeerDto> beerOptional = beerService.getBeerById(1);
 
         // Then
         assertThat(beerOptional).isEmpty();
@@ -84,9 +100,17 @@ class BeerServiceImplTest {
     }
 
     @Test
-    void saveBeer() {
+    void createBeer() {
         // Given
-        Beer beerToSave = Beer.builder()
+        BeerDto beerToCreate = BeerDto.builder()
+                .beerName("New Beer")
+                .beerStyle("Stout")
+                .upc("654321")
+                .price(new BigDecimal("14.99"))
+                .quantityOnHand(200)
+                .build();
+
+        Beer mappedEntity = Beer.builder()
                 .beerName("New Beer")
                 .beerStyle("Stout")
                 .upc("654321")
@@ -103,10 +127,21 @@ class BeerServiceImplTest {
                 .quantityOnHand(200)
                 .build();
 
+        BeerDto savedDto = BeerDto.builder()
+                .id(2)
+                .beerName("New Beer")
+                .beerStyle("Stout")
+                .upc("654321")
+                .price(new BigDecimal("14.99"))
+                .quantityOnHand(200)
+                .build();
+
+        when(beerMapper.toEntity(beerToCreate)).thenReturn(mappedEntity);
         when(beerRepository.save(any(Beer.class))).thenReturn(savedBeer);
+        when(beerMapper.toDto(savedBeer)).thenReturn(savedDto);
 
         // When
-        Beer result = beerService.saveBeer(beerToSave);
+        BeerDto result = beerService.createBeer(beerToCreate);
 
         // Then
         assertThat(result).isNotNull();
@@ -118,7 +153,20 @@ class BeerServiceImplTest {
     @Test
     void updateBeer() {
         // Given
-        Beer beerToUpdate = Beer.builder()
+        BeerDto beerToUpdate = BeerDto.builder()
+                .beerName("Updated Beer")
+                .beerStyle("Lager")
+                .upc("789012")
+                .price(new BigDecimal("16.99"))
+                .quantityOnHand(150)
+                .build();
+
+        Beer existing = Beer.builder()
+                .id(1)
+                .beerName("Old")
+                .build();
+
+        Beer saved = Beer.builder()
                 .id(1)
                 .beerName("Updated Beer")
                 .beerStyle("Lager")
@@ -127,27 +175,42 @@ class BeerServiceImplTest {
                 .quantityOnHand(150)
                 .build();
 
-        when(beerRepository.save(any(Beer.class))).thenReturn(beerToUpdate);
+        BeerDto savedDto = BeerDto.builder()
+                .id(1)
+                .beerName("Updated Beer")
+                .beerStyle("Lager")
+                .upc("789012")
+                .price(new BigDecimal("16.99"))
+                .quantityOnHand(150)
+                .build();
+
+        when(beerRepository.findById(1)).thenReturn(Optional.of(existing));
+        // updateEntityFromDto is void - just stub to do nothing
+        doAnswer(invocation -> null).when(beerMapper).updateEntityFromDto(eq(beerToUpdate), any(Beer.class));
+        when(beerRepository.save(any(Beer.class))).thenReturn(saved);
+        when(beerMapper.toDto(saved)).thenReturn(savedDto);
 
         // When
-        Beer result = beerService.saveBeer(beerToUpdate);
+        Optional<BeerDto> result = beerService.updateBeer(1, beerToUpdate);
 
         // Then
-        assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(1);
-        assertThat(result.getBeerName()).isEqualTo("Updated Beer");
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEqualTo(1);
+        assertThat(result.get().getBeerName()).isEqualTo("Updated Beer");
         verify(beerRepository, times(1)).save(any(Beer.class));
     }
 
     @Test
     void deleteBeerById() {
         // Given
+        when(beerRepository.findById(anyInt())).thenReturn(Optional.of(testBeer));
         doNothing().when(beerRepository).deleteById(anyInt());
 
         // When
-        beerService.deleteBeerById(1);
+        boolean result = beerService.deleteBeerById(1);
 
         // Then
+        assertThat(result).isTrue();
         verify(beerRepository, times(1)).deleteById(1);
     }
 }

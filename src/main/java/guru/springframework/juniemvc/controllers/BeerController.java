@@ -1,33 +1,33 @@
 package guru.springframework.juniemvc.controllers;
 
-import guru.springframework.juniemvc.entities.Beer;
+import guru.springframework.juniemvc.models.BeerDto;
 import guru.springframework.juniemvc.services.BeerService;
-import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * REST Controller for Beer operations
  */
 @RestController
 @RequestMapping("/api/v1/beers")
-public class BeerController {
+class BeerController {
 
     private final BeerService beerService;
 
-    public BeerController(BeerService beerService) {
+    BeerController(BeerService beerService) {
         this.beerService = beerService;
     }
 
     /**
      * Get all beers
-     * @return List of all beers
+     * @return List of all beers as DTOs
      */
     @GetMapping
-    public List<Beer> getAllBeers() {
+    List<BeerDto> getAllBeers() {
         return beerService.getAllBeers();
     }
 
@@ -37,45 +37,35 @@ public class BeerController {
      * @return ResponseEntity with the beer if found, or 404 Not Found
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Beer> getBeerById(@PathVariable Integer id) {
-        Optional<Beer> beerOptional = beerService.getBeerById(id);
-
-        return beerOptional
+    ResponseEntity<BeerDto> getBeerById(@PathVariable Integer id) {
+        return beerService.getBeerById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     /**
      * Create a new beer
-     * @param beer the beer to create
-     * @return ResponseEntity with the created beer and 201 Created status
+     * @param beerDto the beer to create
+     * @return ResponseEntity with the created beer and 201 Created status and Location header
      */
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Beer createBeer(@RequestBody Beer beer) {
-        // Ensure a new beer is created, not an update
-        beer.setId(null);
-        return beerService.saveBeer(beer);
+    ResponseEntity<BeerDto> createBeer(@Valid @RequestBody BeerDto beerDto) {
+        BeerDto created = beerService.createBeer(beerDto);
+        URI location = URI.create("/api/v1/beers/" + created.getId());
+        return ResponseEntity.created(location).body(created);
     }
 
     /**
      * Update an existing beer
      * @param id the beer ID
-     * @param beer the updated beer data
+     * @param beerDto the updated beer data
      * @return ResponseEntity with the updated beer if found, or 404 Not Found
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Beer> updateBeer(@PathVariable Integer id, @RequestBody Beer beer) {
-        Optional<Beer> beerOptional = beerService.getBeerById(id);
-
-        if (beerOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        // Ensure we're updating the correct beer
-        beer.setId(id);
-        Beer updatedBeer = beerService.saveBeer(beer);
-        return ResponseEntity.ok(updatedBeer);
+    ResponseEntity<BeerDto> updateBeer(@PathVariable Integer id, @Valid @RequestBody BeerDto beerDto) {
+        return beerService.updateBeer(id, beerDto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     /**
@@ -84,14 +74,11 @@ public class BeerController {
      * @return ResponseEntity with no content if successful, or 404 Not Found
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBeer(@PathVariable Integer id) {
-        Optional<Beer> beerOptional = beerService.getBeerById(id);
-
-        if (beerOptional.isEmpty()) {
+    ResponseEntity<Void> deleteBeer(@PathVariable Integer id) {
+        boolean deleted = beerService.deleteBeerById(id);
+        if (!deleted) {
             return ResponseEntity.notFound().build();
         }
-
-        beerService.deleteBeerById(id);
         return ResponseEntity.noContent().build();
     }
 }
