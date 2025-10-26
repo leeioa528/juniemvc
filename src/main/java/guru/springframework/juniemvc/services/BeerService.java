@@ -1,6 +1,6 @@
 package guru.springframework.juniemvc.services;
 
-import guru.springframework.juniemvc.entities.Beer;
+import guru.springframework.juniemvc.models.BeerDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,27 +12,36 @@ public interface BeerService {
 
     /**
      * Get all beers
-     * @return List of all beers
+     * @return List of all beers as DTOs
      */
-    List<Beer> getAllBeers();
+    List<BeerDto> getAllBeers();
 
     /**
      * Get a beer by its ID
      * @param id the beer ID
-     * @return Optional containing the beer if found
+     * @return Optional containing the beer DTO if found
      */
-    Optional<Beer> getBeerById(Integer id);
+    Optional<BeerDto> getBeerById(Integer id);
 
     /**
-     * Save a new beer or update an existing one
-     * @param beer the beer to save
-     * @return the saved beer
+     * Create a new beer from DTO
+     * @param beerDto the beer to create
+     * @return the created beer DTO
      */
-    Beer saveBeer(Beer beer);
+    BeerDto createBeer(BeerDto beerDto);
+
+    /**
+     * Update an existing beer
+     * @param id the beer ID
+     * @param beerDto the data to update
+     * @return Optional of updated DTO if found
+     */
+    Optional<BeerDto> updateBeer(Integer id, BeerDto beerDto);
 
     /**
      * Delete a beer by its ID
      * @param id the beer ID
+     * @return true if deleted, false if not found
      */
-    void deleteBeerById(Integer id);
+    boolean deleteBeerById(Integer id);
 }

@@ -1,6 +1,27 @@
 # JetBrains Junie
 ## Spring 6 Rest MVC
 
+### DTO-Based API and MapStruct
+This application now separates the Web layer from the Persistence layer using Data Transfer Objects (DTOs):
+
+- Web controllers exchange `BeerDto` objects with clients and never expose JPA entities directly.
+- Mappings between the JPA `Beer` entity and `BeerDto` are implemented via MapStruct (`BeerMapper`) with `componentModel=spring` so the mapper is injected as a Spring bean.
+- Server-managed fields (`id`, `version`, `createdDate`, `updateDate`) are ignored on create/update mappings and populated by the database/Hibernate.
+- Validation is applied on the DTO (`@NotBlank`, `@PositiveOrZero`, `@DecimalMin`) and enforced by annotating controller request bodies with `@Valid`.
+- Global exception handling returns RFC 9457 `ProblemDetail` responses for validation errors (400) and not found (404).
+
+Key files:
+- `src/main/java/guru/springframework/juniemvc/models/BeerDto.java`
+- `src/main/java/guru/springframework/juniemvc/mappers/BeerMapper.java`
+- `src/main/java/guru/springframework/juniemvc/services/BeerService.java` (DTO-based signatures)
+- `src/main/java/guru/springframework/juniemvc/services/BeerServiceImpl.java`
+- `src/main/java/guru/springframework/juniemvc/controllers/BeerController.java`
+- `src/main/java/guru/springframework/juniemvc/handlers/GlobalExceptionHandler.java`
+
+Build notes:
+- MapStruct and Lombok annotation processors are configured in `pom.xml`.
+- OSIV is disabled via `spring.jpa.open-in-view=false` to avoid lazy loading during serialization.
+
 The application is a simple Spring Boot 3 / Spring Framework 6 web application. It is used to help students learn how
 to use the Spring Framework. Step by step instructions and detailed explanations can be found within the course.
 
