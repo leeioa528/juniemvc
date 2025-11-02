@@ -29,7 +29,7 @@ class GlobalExceptionHandler {
         return problem;
     }
 
-    @ExceptionHandler({java.util.NoSuchElementException.class})
+    @ExceptionHandler({java.util.NoSuchElementException.class, NotFoundException.class})
     ProblemDetail handleNotFound(RuntimeException ex) {
         ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
         problem.setTitle("Resource Not Found");
