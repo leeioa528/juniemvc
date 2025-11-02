@@ -1,4 +1,13 @@
-Analyze the attached ERD image. Create detailed instructions for a Java developer to implement the relationships in JPA with Lombok.
+Analyze the file `/prompts/create-beer-order/requirements-draft.md` and inspect the project.
+Update the requirements to include instructions for the creation of repositories,
+services, dtos, mappers, controllers and tests for CRUD operations.
+Improve and rewrite the draft requirements to a new file called `/prompts/create-beer-order/requirements.md`.
+
+
+---------------------------------------------------------------------
+
+Analyze the attached ERD image. Create detailed instructions for a Java developer to implement the relationships in JPA 
+with Lombok.
 
 ----------------------------------------
 

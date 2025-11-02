@@ -78,3 +78,45 @@ Got a question about your Spring Framework 6 course? [Checkout these FAQs!](http
 * Like Spring Framework Guru on [Facebook](https://www.facebook.com/springframeworkguru/)
 * Follow Spring Framework Guru on [Twitter](https://twitter.com/spring_guru)
 * Connect with John Thompson on [LinkedIn](http://www.linkedin.com/in/springguru)
+
+
+## Beer Order API
+The project implements a Beer Order domain and DTO-based REST API following the included Spring Boot Guidelines.
+
+Base URL
+- `/api/v1/orders`
+
+Endpoints
+- POST `/api/v1/orders` — Create an order
+  - Request: `BeerOrderDto` with `customerRef` and at least one `orderLines` item
+  - Response: `201 Created` with `Location` header `/api/v1/orders/{id}` and created body
+- GET `/api/v1/orders/{id}` — Fetch a single order
+  - Response: `200 OK` with `BeerOrderDto` or `404 Not Found` if missing
+- GET `/api/v1/orders` — List orders (paginated)
+  - Query params: `page`, `size`, `sort` (default sort by `id`)
+  - Response: `200 OK` with a `Page<BeerOrderDto>` JSON
+- PUT `/api/v1/orders/{id}` — Full update/replace of an order
+  - Response: `200 OK` with updated `BeerOrderDto` or `404 Not Found`
+- DELETE `/api/v1/orders/{id}` — Idempotent delete
+  - Response: `204 No Content`
+
+DTOs
+- `BeerOrderDto` — `id`, `version`, `customerRef`, `orderLines`, `createdDate`, `updateDate`
+  - Validation: `@NotBlank customerRef`, `@NotNull @Size(min=1) orderLines`
+- `BeerOrderLineDto` — `id`, `version`, `beerId`, `orderQuantity`, `price`, `createdDate`, `updateDate`
+  - Validation: `@NotNull beerId`, `@NotNull @Positive orderQuantity`
+
+Mappers
+- MapStruct mappers convert between entities and DTOs while ignoring server-managed fields on input.
+
+Transactions
+- Service layer methods are annotated with `@Transactional` and `@Transactional(readOnly = true)` where appropriate.
+
+Error Handling
+- A global `@RestControllerAdvice` returns RFC 9457 `ProblemDetail` for:
+  - Validation errors (400)
+  - Not found errors (404)
+
+Notes
+- OSIV is disabled: `spring.jpa.open-in-view=false`
+- Logging via SLF4J; no sensitive data is logged.
