@@ -182,3 +182,26 @@ logger.atDebug()
 * **Multiple outputs and formats:** Direct logs to consoles, rolling files, databases, or remote systems, and choose formats like JSON for seamless ingestion into ELK, Loki, or other log-analysis tools.
 
 * **Better tooling and analysis:** Structured logs and controlled log levels make it easier to filter noise, automate alerts, and visualize application behavior in real time.„
+
+## 15. Flyway Migrations with Spring Boot
+* Default location: place versioned SQL scripts on the classpath at `src/main/resources/db/migration` (i.e., classpath:`db/migration`). Spring Boot auto-detects and runs them on startup when Flyway is on the classpath.
+* Versioned migration naming: use `V<version>__<description>.sql` with a double underscore as the separator. Examples:
+
+```
+V1__init_schema.sql
+V2__add_beer_table.sql
+V3_1__add_indexes.sql   // semantic version segments are allowed
+```
+
+* Repeatable migrations: use `R__<description>.sql` for scripts that can be re-run when contents change (e.g., views, functions).
+* Schema history: Flyway records applied migrations in the `flyway_schema_history` table to ensure each migration runs exactly once per database.
+* Basic configuration (optional): defaults usually work; you can customize in `application.properties`.
+
+```
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration   # default
+```
+
+**Explanation:**
+
+* Keeping all DDL changes as ordered, versioned files ensures every environment (local, CI, staging, prod) evolves the schema in the same, repeatable way. Using the default `db/migration` location and `V...__...` naming lets Spring Boot and Flyway work with zero custom setup.
