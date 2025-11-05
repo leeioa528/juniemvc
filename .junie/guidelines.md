@@ -205,3 +205,104 @@ spring.flyway.locations=classpath:db/migration   # default
 **Explanation:**
 
 * Keeping all DDL changes as ordered, versioned files ensures every environment (local, CI, staging, prod) evolves the schema in the same, repeatable way. Using the default `db/migration` location and `V...__...` naming lets Spring Boot and Flyway work with zero custom setup.
+
+
+## 16. OpenAPI Documentation for This Project
+
+This project ships an OpenAPI 3.1 specification under `openapi/openapi/openapi.yaml`. It is organized as a modular definition that uses `$ref` file references to keep the spec maintainable.
+
+- Entrypoint: `openapi/openapi/openapi.yaml`
+- Tooling: Redocly CLI (declared in `openapi/package.json`)
+  - `npm start` previews docs
+  - `npm run build` bundles the spec
+  - `npm test` lints/validates the spec
+
+### 16.1 Paths and File Naming Conventions
+
+Paths are defined in separate YAML files under `openapi/openapi/paths`, and are referenced from the `paths:` section of `openapi.yaml`.
+
+Observed examples in this repo:
+- `'/users/{username}': $ref: 'paths/users_{username}.yaml'`
+- `'/user': $ref: 'paths/user.yaml'`
+- `'/user/list': $ref: 'paths/user-status.yaml'`
+- `'/echo': $ref: 'paths/echo.yaml'`
+
+Conventions to follow:
+- File-per-path: prefer one file per path item (the OpenAPI Path Item object). Redocly recommends this as the semantically accurate approach for OAS 3.x.
+- Path separator in file names: use underscore `_` to represent the `/` separator in filenames when keeping all files flat under `paths`.
+  - Example: API path `/users/{username}` becomes file `users_{username}.yaml`.
+- Path parameters in filenames: keep parameters wrapped in `{}` in the filename to match the URL pattern (e.g., `{username}`).
+- Alternative structure (when needed): you may mirror the URL with subfolders (e.g., `paths/customers/{id}/get.yaml`), but in this repo the flat structure with `_` is used for many paths.
+
+Tips:
+- Keep `$ref` paths relative to `openapi.yaml` when referenced from the entrypoint (e.g., `paths/users_{username}.yaml`).
+- When referencing from within a `paths/*.yaml` file, use relative `../components/...` paths to reach components.
+
+### 16.2 Components (Schemas, Headers, Responses, Security)
+
+Reusable components are placed under `openapi/openapi/components` and referenced from both the entrypoint and path files.
+
+Common locations and examples found in this repo:
+- Schemas: `openapi/openapi/components/schemas/*.yaml`
+  - Example usage: `$ref: '../components/schemas/User.yaml'`
+- Headers: `openapi/openapi/components/headers/*.yaml`
+  - Example usage: `$ref: '../components/headers/ExpiresAfter.yaml'`
+- Responses: `openapi/openapi/components/responses/*.yaml`
+  - Example usage: `$ref: '../components/responses/Problem.yaml'`
+- Security schemes: declared inline under `components.securitySchemes` in `openapi.yaml` (e.g., `main_auth`, `api_key`, `basic_auth`).
+
+Guidelines:
+- Use PascalCase filenames for schemas/headers/responses (e.g., `User.yaml`, `Problem.yaml`, `ExpiresAfter.yaml`).
+- Keep each schema/header/response in its own file for clarity and reuse.
+- Reference with a relative path from the file that uses it; from a `paths/*.yaml` file, references typically start with `../components/...`.
+
+### 16.3 Servers, Tags, and Webhooks (Context)
+
+- Servers: defined in `openapi.yaml` with templated variables, e.g., `https://{tenant}/api/v1`.
+- Tags: grouped via `tags` and `x-tagGroups` in `openapi.yaml` to organize the docs.
+- Webhooks: example webhook `webhooks.userInfo` uses `components/schemas/User.yaml` for its payload schema via `$ref`.
+
+### 16.4 How to Validate and Test the OpenAPI Spec
+
+We use Redocly CLI to lint and validate the specification. The `openapi/package.json` defines scripts:
+
+```json
+{
+  "scripts": {
+    "start": "redocly preview-docs",
+    "build": "redocly bundle -o dist/bundle.yaml",
+    "test": "redocly lint"
+  }
+}
+```
+
+Run the following from the repository root or the `openapi` folder:
+
+- First-time setup (installs the Redocly CLI locally):
+  - From repo root:
+    ```bash
+    cd openapi
+    npm ci   # or: npm install
+    ```
+- Lint / test the spec:
+  ```bash
+  npm test
+  ```
+  This runs `redocly lint`, validating `openapi/openapi/openapi.yaml` (and all referenced files) for OpenAPI correctness and best practices.
+
+Optional useful commands:
+- Preview the docs locally in a browser (auto reload on changes):
+  ```bash
+  npm start
+  ```
+- Produce a single bundled file for distribution:
+  ```bash
+  npm run build
+  ```
+
+### 16.5 Authoring Checklist
+
+- When adding a new API path, create a matching file under `openapi/openapi/paths` using the underscore `_` separator and curly-braced parameters, and add a `$ref` under `paths:` in `openapi.yaml`.
+- Define any reusable request/response bodies as schemas under `components/schemas` and reference them via `$ref`.
+- Put reusable headers in `components/headers` and common error responses in `components/responses`.
+- Keep references relative and verify them with `npm test` before committing.
