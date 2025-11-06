@@ -1,0 +1,77 @@
+get:
+  tags:
+    - Beer
+  summary: List beers
+  description: Retrieve all beers as a collection.
+  operationId: listBeers
+  responses:
+    '200':
+      description: A list of beers.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/Beer.yaml'
+          examples:
+            default:
+              summary: Example list
+              value:
+                - id: 101
+                  version: 1
+                  beerName: Galaxy Cat IPA
+                  beerStyle: IPA
+                  upc: '0123456789012'
+                  quantityOnHand: 120
+                  price: 12.99
+                  createdDate: 2025-01-15T10:15:30Z
+                  updateDate: 2025-02-10T08:00:00Z
+                - id: 102
+                  version: 4
+                  beerName: Sunrise Stout
+                  beerStyle: STOUT
+                  upc: '0001234567890'
+                  quantityOnHand: 54
+                  price: 9.5
+                  createdDate: 2025-01-05T09:00:00Z
+                  updateDate: 2025-02-12T12:00:00Z
+    '400':
+      $ref: '../components/responses/Problem.yaml'
+post:
+  tags:
+    - Beer
+  summary: Create beer
+  description: Create a new beer. Returns 201 with the created resource and a Location header.
+  operationId: createBeer
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          allOf:
+            - $ref: '../components/schemas/Beer.yaml'
+          # readOnly properties are ignored on input
+        examples:
+          create:
+            summary: Create Beer example
+            value:
+              beerName: Galaxy Cat IPA
+              beerStyle: IPA
+              upc: '0123456789012'
+              quantityOnHand: 120
+              price: 12.99
+  responses:
+    '201':
+      description: Created
+      headers:
+        Location:
+          description: Absolute URL of the newly created resource.
+          schema:
+            type: string
+            format: uri
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Beer.yaml'
+    '400':
+      $ref: '../components/responses/Problem.yaml'

@@ -1,0 +1,76 @@
+title: Beer
+description: |
+  Beer resource returned by the Beer API. Server-managed fields such as `id`, `version`,
+  `createdDate`, and `updateDate` are read-only and may be omitted in create/update requests.
+  Validation constraints mirror the Spring `BeerDto` annotations.
+type: object
+properties:
+  id:
+    type: integer
+    format: int32
+    readOnly: true
+    description: Unique identifier assigned by the server.
+    example: 101
+  version:
+    type: integer
+    format: int32
+    readOnly: true
+    description: Version number for optimistic locking, assigned by the server.
+    example: 3
+  beerName:
+    type: string
+    description: Human-friendly name of the beer.
+    minLength: 1
+    example: Galaxy Cat IPA
+  beerStyle:
+    type: string
+    description: |
+      Style of the beer (for example: "ALE", "PALE ALE", "IPA", "STOUT").
+    minLength: 1
+    example: IPA
+  upc:
+    type: string
+    description: |
+      Universal Product Code for the beer. Expected to be a 13-digit numeric string.
+    minLength: 1
+    pattern: '^[0-9]{13}$'
+    example: "0123456789012"
+  quantityOnHand:
+    type: integer
+    format: int32
+    description: Number of units available in inventory. Must be zero or positive.
+    minimum: 0
+    example: 42
+  price:
+    type: number
+    description: Unit price of the beer. Must be strictly positive.
+    exclusiveMinimum: 0
+    example: 12.99
+  createdDate:
+    type: string
+    format: date-time
+    readOnly: true
+    description: Timestamp when the beer was created (server-managed).
+    example: 2025-01-15T10:15:30Z
+  updateDate:
+    type: string
+    format: date-time
+    readOnly: true
+    description: Timestamp when the beer was last updated (server-managed).
+    example: 2025-02-10T08:00:00Z
+required:
+  - beerName
+  - beerStyle
+  - upc
+  - quantityOnHand
+  - price
+example:
+  id: 101
+  version: 1
+  beerName: Galaxy Cat IPA
+  beerStyle: IPA
+  upc: "0123456789012"
+  quantityOnHand: 120
+  price: 12.99
+  createdDate: 2025-01-15T10:15:30Z
+  updateDate: 2025-02-10T08:00:00Z

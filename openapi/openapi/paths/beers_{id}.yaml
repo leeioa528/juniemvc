@@ -1,0 +1,65 @@
+parameters:
+  - name: id
+    in: path
+    required: true
+    description: Numeric identifier of the beer.
+    schema:
+      type: integer
+      format: int32
+get:
+  tags:
+    - Beer
+  summary: Get beer by ID
+  operationId: getBeerById
+  responses:
+    '200':
+      description: Beer found
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Beer.yaml'
+    '404':
+      $ref: '../components/responses/Problem.yaml'
+put:
+  tags:
+    - Beer
+  summary: Update beer
+  description: Update an existing beer by its ID.
+  operationId: updateBeer
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          allOf:
+            - $ref: '../components/schemas/Beer.yaml'
+        examples:
+          update:
+            summary: Update Beer example
+            value:
+              beerName: Galaxy Cat IPA
+              beerStyle: IPA
+              upc: '0123456789012'
+              quantityOnHand: 150
+              price: 13.49
+  responses:
+    '200':
+      description: Updated
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Beer.yaml'
+    '400':
+      $ref: '../components/responses/Problem.yaml'
+    '404':
+      $ref: '../components/responses/Problem.yaml'
+delete:
+  tags:
+    - Beer
+  summary: Delete beer
+  operationId: deleteBeer
+  responses:
+    '204':
+      description: Deleted successfully
+    '404':
+      $ref: '../components/responses/Problem.yaml'
