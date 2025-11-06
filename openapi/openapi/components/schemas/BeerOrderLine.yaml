@@ -1,0 +1,56 @@
+title: BeerOrderLine
+description: |
+  A line item within a beer order. Includes the beer being ordered and the quantity.
+  Server-managed fields such as `id`, `version`, `createdDate`, and `updateDate` are read-only.
+type: object
+properties:
+  id:
+    type: integer
+    format: int32
+    readOnly: true
+    description: Unique identifier of the order line (server-assigned).
+    example: 1001
+  version:
+    type: integer
+    format: int32
+    readOnly: true
+    description: Version for optimistic locking (server-managed).
+    example: 1
+  beerId:
+    type: integer
+    format: int32
+    description: Identifier of the beer being ordered.
+    example: 101
+  orderQuantity:
+    type: integer
+    format: int32
+    description: Number of units requested for this beer. Must be a positive integer.
+    minimum: 1
+    example: 12
+  price:
+    type: number
+    description: Unit price captured at the time of ordering. May be omitted for price lookup on server.
+    example: 12.99
+  createdDate:
+    type: string
+    format: date-time
+    readOnly: true
+    description: Timestamp when this order line was created.
+    example: 2025-01-15T10:15:30Z
+  updateDate:
+    type: string
+    format: date-time
+    readOnly: true
+    description: Timestamp when this order line was last updated.
+    example: 2025-02-10T08:00:00Z
+required:
+  - beerId
+  - orderQuantity
+example:
+  id: 1001
+  version: 1
+  beerId: 101
+  orderQuantity: 12
+  price: 12.99
+  createdDate: 2025-01-15T10:15:30Z
+  updateDate: 2025-02-10T08:00:00Z

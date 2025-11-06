@@ -1,0 +1,57 @@
+title: BeerOrder
+description: |
+  Beer order aggregate containing customer reference and one or more order lines.
+  Server-managed fields such as `id`, `version`, `createdDate`, and `updateDate` are read-only.
+type: object
+properties:
+  id:
+    type: integer
+    format: int32
+    readOnly: true
+    description: Unique identifier assigned by the server.
+    example: 5001
+  version:
+    type: integer
+    format: int32
+    readOnly: true
+    description: Version number for optimistic locking, assigned by the server.
+    example: 1
+  customerRef:
+    type: string
+    description: Optional reference provided by the customer for correlation (must not be blank).
+    minLength: 1
+    example: WEB-ORDER-2025-000123
+  orderLines:
+    type: array
+    description: List of order lines. Must contain at least one item.
+    minItems: 1
+    items:
+      $ref: './BeerOrderLine.yaml'
+  createdDate:
+    type: string
+    format: date-time
+    readOnly: true
+    description: Timestamp when the order was created (server-managed).
+    example: 2025-01-15T10:15:30Z
+  updateDate:
+    type: string
+    format: date-time
+    readOnly: true
+    description: Timestamp when the order was last updated (server-managed).
+    example: 2025-02-10T08:00:00Z
+required:
+  - customerRef
+  - orderLines
+example:
+  id: 5001
+  version: 1
+  customerRef: WEB-ORDER-2025-000123
+  orderLines:
+    - beerId: 101
+      orderQuantity: 12
+      price: 12.99
+    - beerId: 102
+      orderQuantity: 6
+      price: 9.50
+  createdDate: 2025-01-15T10:15:30Z
+  updateDate: 2025-02-10T08:00:00Z

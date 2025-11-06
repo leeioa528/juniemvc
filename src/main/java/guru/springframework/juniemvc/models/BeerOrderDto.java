@@ -21,7 +21,7 @@ import java.util.List;
 public class BeerOrderDto {
     private Integer id; // server-managed
     private Integer version; // server-managed
-
+    //reference information from customer
     @NotBlank
     private String customerRef;
 

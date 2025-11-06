@@ -1,0 +1,81 @@
+get:
+  tags:
+    - BeerOrder
+  summary: List orders
+  description: Retrieve a paginated list of beer orders.
+  operationId: listOrders
+  parameters:
+    - in: query
+      name: page
+      description: Page number (0-based).
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+      example: 0
+    - in: query
+      name: size
+      description: Page size (number of elements per page).
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+      example: 20
+    - in: query
+      name: sort
+      description: 'Sorting criteria in the format: property(,asc|desc). Multiple sort params are supported.'
+      schema:
+        type: array
+        items:
+          type: string
+      style: form
+      explode: true
+      example:
+        - id,desc
+  responses:
+    '200':
+      description: A page of orders.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/BeerOrderPage.yaml'
+    '400':
+      $ref: '../components/responses/Problem.yaml'
+post:
+  tags:
+    - BeerOrder
+  summary: Create order
+  description: Create a new beer order. Returns 201 with the created resource and a Location header.
+  operationId: createOrder
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          allOf:
+            - $ref: '../components/schemas/BeerOrder.yaml'
+        examples:
+          create:
+            summary: Create Beer Order example
+            value:
+              customerRef: WEB-ORDER-2025-000123
+              orderLines:
+                - beerId: 101
+                  orderQuantity: 12
+                - beerId: 102
+                  orderQuantity: 6
+  responses:
+    '201':
+      description: Created
+      headers:
+        Location:
+          description: Absolute URL of the newly created resource.
+          schema:
+            type: string
+            format: uri
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/BeerOrder.yaml'
+    '400':
+      $ref: '../components/responses/Problem.yaml'
