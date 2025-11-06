@@ -1,0 +1,72 @@
+parameters:
+  - in: path
+    name: id
+    required: true
+    description: Unique identifier of the beer order.
+    schema:
+      type: integer
+      format: int32
+get:
+  tags:
+    - BeerOrder
+  summary: Get order by ID
+  description: Retrieve a single beer order by its identifier.
+  operationId: getOrder
+  responses:
+    '200':
+      description: Beer order found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/BeerOrder.yaml'
+    '404':
+      $ref: '../components/responses/Problem.yaml'
+    '400':
+      $ref: '../components/responses/Problem.yaml'
+put:
+  tags:
+    - BeerOrder
+  summary: Update order
+  description: Replace a beer order by ID.
+  operationId: updateOrder
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          allOf:
+            - $ref: '../components/schemas/BeerOrder.yaml'
+        examples:
+          update:
+            summary: Update Beer Order example
+            value:
+              customerRef: WEB-ORDER-2025-000123
+              orderLines:
+                - beerId: 101
+                  orderQuantity: 24
+                - beerId: 102
+                  orderQuantity: 12
+  responses:
+    '200':
+      description: Updated
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/BeerOrder.yaml'
+    '400':
+      $ref: '../components/responses/Problem.yaml'
+    '404':
+      $ref: '../components/responses/Problem.yaml'
+delete:
+  tags:
+    - BeerOrder
+  summary: Delete order
+  description: Delete a beer order by ID. Idempotent operation.
+  operationId: deleteOrder
+  responses:
+    '204':
+      description: No Content
+    '404':
+      $ref: '../components/responses/Problem.yaml'
+    '400':
+      $ref: '../components/responses/Problem.yaml'
