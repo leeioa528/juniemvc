@@ -1,0 +1,102 @@
+get:
+  tags:
+    - Customer
+  summary: Get customer by id
+  description: Retrieve a customer by its identifier.
+  operationId: getCustomer
+  parameters:
+    - in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+        format: int32
+  responses:
+    '200':
+      description: Customer found
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/CustomerResponse.yaml'
+    '404':
+      $ref: '../components/responses/Problem.yaml'
+put:
+  tags:
+    - Customer
+  summary: Update customer
+  description: Update customer fields by id.
+  operationId: updateCustomer
+  parameters:
+    - in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+        format: int32
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/CustomerRequest.yaml'
+  responses:
+    '200':
+      description: Updated
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/CustomerResponse.yaml'
+    '400':
+      $ref: '../components/responses/Problem.yaml'
+    '404':
+      $ref: '../components/responses/Problem.yaml'
+patch:
+  tags:
+    - Customer
+  summary: Patch customer
+  description: Partially update customer fields by id.
+  operationId: patchCustomer
+  parameters:
+    - in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+        format: int32
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/CustomerRequest.yaml'
+  responses:
+    '200':
+      description: Patched
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/CustomerResponse.yaml'
+    '400':
+      $ref: '../components/responses/Problem.yaml'
+    '404':
+      $ref: '../components/responses/Problem.yaml'
+delete:
+  tags:
+    - Customer
+  summary: Delete customer
+  description: Delete customer by id.
+  operationId: deleteCustomer
+  parameters:
+    - in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+        format: int32
+  responses:
+    '204':
+      description: No Content
+    '404':
+      $ref: '../components/responses/Problem.yaml'
+    '409':
+      $ref: '../components/responses/Problem.yaml'

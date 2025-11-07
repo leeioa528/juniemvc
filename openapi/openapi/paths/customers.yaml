@@ -1,0 +1,70 @@
+get:
+  tags:
+    - Customer
+  summary: List customers
+  description: Retrieve a paginated list of customers.
+  operationId: listCustomers
+  parameters:
+    - in: query
+      name: page
+      description: Page number (0-based).
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+      example: 0
+    - in: query
+      name: size
+      description: Page size (number of elements per page).
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+      example: 20
+    - in: query
+      name: sort
+      description: 'Sorting criteria in the format: property(,asc|desc). Multiple sort params are supported.'
+      schema:
+        type: array
+        items:
+          type: string
+      style: form
+      explode: true
+      example:
+        - id,desc
+  responses:
+    '200':
+      description: A page of customers.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/CustomerPage.yaml'
+    '400':
+      $ref: '../components/responses/Problem.yaml'
+post:
+  tags:
+    - Customer
+  summary: Create customer
+  description: Create a new customer. Returns 201 with the created resource and a Location header.
+  operationId: createCustomer
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/CustomerRequest.yaml'
+  responses:
+    '201':
+      description: Created
+      headers:
+        Location:
+          description: Absolute URL of the newly created resource.
+          schema:
+            type: string
+            format: uri
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/CustomerResponse.yaml'
+    '400':
+      $ref: '../components/responses/Problem.yaml'

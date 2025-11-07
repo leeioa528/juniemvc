@@ -10,4 +10,6 @@ public interface BeerOrderRepository extends JpaRepository<BeerOrder, Integer> {
 
     @EntityGraph(attributePaths = "orderLines")
     Optional<BeerOrder> findWithOrderLinesById(Integer id);
+
+    long countByCustomer_Id(Integer customerId);
 }

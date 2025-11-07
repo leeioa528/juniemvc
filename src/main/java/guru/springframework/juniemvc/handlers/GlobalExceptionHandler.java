@@ -37,4 +37,13 @@ class GlobalExceptionHandler {
         problem.setDetail(ex.getMessage());
         return problem;
     }
+
+    @ExceptionHandler({IllegalStateException.class})
+    ProblemDetail handleConflict(IllegalStateException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problem.setTitle("Conflict");
+        problem.setType(URI.create("https://example.com/problems/conflict"));
+        problem.setDetail(ex.getMessage());
+        return problem;
+    }
 }
