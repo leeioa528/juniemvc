@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="700" viewBox="0 0 1000 700" role="img" aria-labelledby="title desc">
+  <title id="title">ERD — Customer and Beer Order Domain</title>
+  <desc id="desc">Entity-Relationship Diagram derived from prompts/add-customer/plan.md. Shows Customer to BeerOrder (1 to many) and BeerOrder to BeerOrderLine (1 to many) with key attributes.</desc>
+  <defs>
+    <style type="text/css"><![CDATA[
+      .entity { fill: #ffffff; stroke: #333333; stroke-width: 2px; }
+      .header { fill: #2c7be5; }
+      .header-text { font: 600 16px sans-serif; fill: #ffffff; }
+      .attr-text { font: 13px monospace; fill: #222222; }
+      .key { font-weight: 700; }
+      .note { font: 12px sans-serif; fill: #555555; }
+      .connector { stroke: #111111; stroke-width: 2px; fill: none; }
+      .crow { stroke: #111111; stroke-width: 2px; fill: none; }
+      .cardinality { font: 12px sans-serif; fill: #111111; }
+      .shadow { filter: url(#shadow); }
+    ]]></style>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Customer entity -->
+  <g id="Customer" transform="translate(80,90)" class="shadow">
+    <rect class="entity" x="0" y="0" width="320" height="260" rx="8" ry="8"/>
+    <rect class="header" x="0" y="0" width="320" height="36" rx="8" ry="8"/>
+    <text class="header-text" x="16" y="24">Customer</text>
+    <g transform="translate(16,56)">
+      <text class="attr-text key" x="0" y="0">PK id : UUID</text>
+      <text class="attr-text" x="0" y="24">name : varchar(255) NOT NULL</text>
+      <text class="attr-text" x="0" y="48">email : varchar(255)</text>
+      <text class="attr-text" x="0" y="72">phone_number : varchar(50)</text>
+      <text class="attr-text" x="0" y="96">address_line1 : varchar(255) NOT NULL</text>
+      <text class="attr-text" x="0" y="120">address_line2 : varchar(255)</text>
+      <text class="attr-text" x="0" y="144">city : varchar(120) NOT NULL</text>
+      <text class="attr-text" x="0" y="168">state : varchar(120) NOT NULL</text>
+      <text class="attr-text" x="0" y="192">postal_code : varchar(32) NOT NULL</text>
+    </g>
+  </g>
+
+  <!-- BeerOrder entity -->
+  <g id="BeerOrder" transform="translate(560,60)" class="shadow">
+    <rect class="entity" x="0" y="0" width="320" height="220" rx="8" ry="8"/>
+    <rect class="header" x="0" y="0" width="320" height="36" rx="8" ry="8"/>
+    <text class="header-text" x="16" y="24">BeerOrder</text>
+    <g transform="translate(16,56)">
+      <text class="attr-text key" x="0" y="0">PK id : UUID</text>
+      <text class="attr-text" x="0" y="24">FK customer_id : UUID NOT NULL</text>
+      <text class="attr-text" x="0" y="48">order_status : enum</text>
+      <text class="attr-text" x="0" y="72">created_date : timestamp</text>
+      <text class="attr-text" x="0" y="96">last_modified_date : timestamp</text>
+      <text class="attr-text" x="0" y="120">... other fields ...</text>
+    </g>
+  </g>
+
+  <!-- BeerOrderLine entity -->
+  <g id="BeerOrderLine" transform="translate(560,380)" class="shadow">
+    <rect class="entity" x="0" y="0" width="320" height="200" rx="8" ry="8"/>
+    <rect class="header" x="0" y="0" width="320" height="36" rx="8" ry="8"/>
+    <text class="header-text" x="16" y="24">BeerOrderLine</text>
+    <g transform="translate(16,56)">
+      <text class="attr-text key" x="0" y="0">PK id : UUID</text>
+      <text class="attr-text" x="0" y="24">FK beer_order_id : UUID NOT NULL</text>
+      <text class="attr-text" x="0" y="48">beer_id : UUID</text>
+      <text class="attr-text" x="0" y="72">upc : varchar(64)</text>
+      <text class="attr-text" x="0" y="96">order_quantity : int</text>
+      <text class="attr-text" x="0" y="120">... other fields ...</text>
+    </g>
+  </g>
+
+  <!-- Relationship: Customer 1 —— * BeerOrder -->
+  <g id="rel_customer_beerorder">
+    <!-- straight connector -->
+    <path class="connector" d="M 400 200 L 560 160" />
+    <!-- cardinalities -->
+    <text class="cardinality" x="420" y="190">1</text>
+    <text class="cardinality" x="540" y="150">N</text>
+    <!-- crow's foot at BeerOrder side -->
+    <g transform="translate(560,160) rotate(-12)">
+      <path class="crow" d="M 0 0 L 16 -10" />
+      <path class="crow" d="M 0 0 L 16 0" />
+      <path class="crow" d="M 0 0 L 16 10" />
+    </g>
+  </g>
+
+  <!-- Relationship: BeerOrder 1 —— * BeerOrderLine -->
+  <g id="rel_beerorder_beerorderline">
+    <path class="connector" d="M 720 280 L 720 380" />
+    <text class="cardinality" x="726" y="310">1</text>
+    <text class="cardinality" x="726" y="370">N</text>
+    <g transform="translate(720,380)">
+      <path class="crow" d="M 0 0 L 10 -14" />
+      <path class="crow" d="M 0 0 L 10 0" />
+      <path class="crow" d="M 0 0 L 10 14" />
+    </g>
+  </g>
+
+  <!-- Notes -->
+  <g transform="translate(80,380)">
+    <text class="note" x="0" y="0">Notes:</text>
+    <text class="note" x="0" y="20">• Customer → BeerOrder: One-to-Many. No cascading deletes recommended; use ON DELETE RESTRICT.</text>
+    <text class="note" x="0" y="40">• BeerOrder → BeerOrderLine: One-to-Many (existing in project).</text>
+    <text class="note" x="0" y="60">• Field names/constraints per plan.md; adapt to actual column names during implementation.</text>
+  </g>
+</svg>

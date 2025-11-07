@@ -1,0 +1,76 @@
+title: CustomerPage
+description: A paginated result of customers using Spring Data pagination format.
+type: object
+properties:
+  content:
+    type: array
+    items:
+      $ref: './CustomerResponse.yaml'
+  number:
+    type: integer
+    format: int32
+    description: Current page number (0-based).
+    example: 0
+  size:
+    type: integer
+    format: int32
+    description: The size of the page.
+    example: 20
+  totalElements:
+    type: integer
+    format: int64
+    description: Total number of elements available.
+    example: 125
+  totalPages:
+    type: integer
+    format: int32
+    description: Total number of pages available.
+    example: 7
+  sort:
+    type: object
+    description: Sorting configuration for the page contents.
+    properties:
+      sorted:
+        type: boolean
+        example: true
+      unsorted:
+        type: boolean
+        example: false
+      empty:
+        type: boolean
+        example: false
+  first:
+    type: boolean
+    example: true
+  last:
+    type: boolean
+    example: false
+  numberOfElements:
+    type: integer
+    format: int32
+    example: 20
+example:
+  content:
+    - id: 2001
+      version: 1
+      name: Jane Doe
+      email: jane@example.com
+      phoneNumber: '+1-202-555-0172'
+      addressLine1: '123 Main St'
+      addressLine2: 'Apt 4B'
+      city: Springfield
+      state: IL
+      postalCode: '62704'
+      createdDate: 2025-01-15T10:15:30Z
+      updateDate: 2025-02-10T08:00:00Z
+  number: 0
+  size: 20
+  totalElements: 125
+  totalPages: 7
+  sort:
+    sorted: true
+    unsorted: false
+    empty: false
+  first: true
+  last: false
+  numberOfElements: 20

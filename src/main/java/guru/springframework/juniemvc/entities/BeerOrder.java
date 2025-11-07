@@ -30,6 +30,10 @@ public class BeerOrder {
 
     private String customerRef;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
     @OneToMany(mappedBy = "beerOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<BeerOrderLine> orderLines = new ArrayList<>();
