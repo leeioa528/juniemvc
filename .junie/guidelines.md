@@ -201,7 +201,10 @@ V3_1__add_indexes.sql   // semantic version segments are allowed
 spring.flyway.enabled=true
 spring.flyway.locations=classpath:db/migration   # default
 ```
-
+* Use H2 compliant SQL syntax for database migrations.
+* When altering tables to add a property with a foreign key constraint, add the new column first and then add the foreign
+  key constraint in a second SQL statement.
+* 
 **Explanation:**
 
 * Keeping all DDL changes as ordered, versioned files ensures every environment (local, CI, staging, prod) evolves the schema in the same, repeatable way. Using the default `db/migration` location and `V...__...` naming lets Spring Boot and Flyway work with zero custom setup.
