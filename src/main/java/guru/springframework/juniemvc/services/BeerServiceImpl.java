@@ -4,6 +4,9 @@ import guru.springframework.juniemvc.entities.Beer;
 import guru.springframework.juniemvc.mappers.BeerMapper;
 import guru.springframework.juniemvc.models.BeerDto;
 import guru.springframework.juniemvc.repositories.BeerRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,11 +30,13 @@ class BeerServiceImpl implements BeerService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BeerDto> getAllBeers() {
-        return beerRepository.findAll()
-                .stream()
-                .map(beerMapper::toDto)
-                .collect(Collectors.toList());
+    public Page<BeerDto> getBeers(String beanName, Pageable pageable) {
+        Page<Beer> page = (beanName == null || beanName.isBlank())
+                ? beerRepository.findAll(pageable)
+                : beerRepository.findByBeerNameContainingIgnoreCase(beanName, pageable);
+
+        List<BeerDto> content = page.getContent().stream().map(beerMapper::toDto).collect(Collectors.toList());
+        return new PageImpl<>(content, pageable, page.getTotalElements());
     }
 
     @Override

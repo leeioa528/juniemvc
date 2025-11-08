@@ -57,18 +57,43 @@ class BeerServiceImplTest {
     }
 
     @Test
-    void getAllBeers() {
+    void getBeersPagedWithoutFilter() {
         // Given
-        when(beerRepository.findAll()).thenReturn(Arrays.asList(testBeer));
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 10);
+        org.springframework.data.domain.Page<Beer> repoPage = new org.springframework.data.domain.PageImpl<>(
+                java.util.List.of(testBeer), pageable, 1);
+        when(beerRepository.findAll(pageable)).thenReturn(repoPage);
         when(beerMapper.toDto(testBeer)).thenReturn(testBeerDto);
 
         // When
-        List<BeerDto> beers = beerService.getAllBeers();
+        org.springframework.data.domain.Page<BeerDto> result = beerService.getBeers(null, pageable);
 
         // Then
-        assertThat(beers).hasSize(1);
-        assertThat(beers.get(0).getBeerName()).isEqualTo("Test Beer");
-        verify(beerRepository, times(1)).findAll();
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getBeerName()).isEqualTo("Test Beer");
+        verify(beerRepository, times(1)).findAll(pageable);
+        verify(beerRepository, never()).findByBeerNameContainingIgnoreCase(any(), any());
+    }
+
+    @Test
+    void getBeersPagedWithFilter() {
+        // Given
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 5);
+        org.springframework.data.domain.Page<Beer> repoPage = new org.springframework.data.domain.PageImpl<>(
+                java.util.List.of(testBeer), pageable, 1);
+        when(beerRepository.findByBeerNameContainingIgnoreCase("Test", pageable)).thenReturn(repoPage);
+        when(beerMapper.toDto(testBeer)).thenReturn(testBeerDto);
+
+        // When
+        org.springframework.data.domain.Page<BeerDto> result = beerService.getBeers("Test", pageable);
+
+        // Then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getBeerName()).isEqualTo("Test Beer");
+        verify(beerRepository, times(1)).findByBeerNameContainingIgnoreCase("Test", pageable);
+        verify(beerRepository, never()).findAll(pageable);
     }
 
     @Test

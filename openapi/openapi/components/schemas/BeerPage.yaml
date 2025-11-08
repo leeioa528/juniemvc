@@ -1,0 +1,73 @@
+title: BeerPage
+description: A paginated result of beers using Spring Data pagination format.
+type: object
+properties:
+  content:
+    type: array
+    items:
+      $ref: './Beer.yaml'
+  number:
+    type: integer
+    format: int32
+    description: Current page number (0-based).
+    example: 0
+  size:
+    type: integer
+    format: int32
+    description: The size of the page.
+    example: 20
+  totalElements:
+    type: integer
+    format: int64
+    description: Total number of elements available.
+    example: 125
+  totalPages:
+    type: integer
+    format: int32
+    description: Total number of pages available.
+    example: 7
+  sort:
+    type: object
+    description: Sorting configuration for the page contents.
+    properties:
+      sorted:
+        type: boolean
+        example: true
+      unsorted:
+        type: boolean
+        example: false
+      empty:
+        type: boolean
+        example: false
+  first:
+    type: boolean
+    example: true
+  last:
+    type: boolean
+    example: false
+  numberOfElements:
+    type: integer
+    format: int32
+    example: 20
+example:
+  content:
+    - id: 101
+      version: 1
+      beerName: Galaxy Cat IPA
+      beerStyle: IPA
+      upc: '0123456789012'
+      quantityOnHand: 120
+      price: 12.99
+      createdDate: 2025-01-15T10:15:30Z
+      updateDate: 2025-02-10T08:00:00Z
+  number: 0
+  size: 20
+  totalElements: 1
+  totalPages: 1
+  sort:
+    sorted: true
+    unsorted: false
+    empty: false
+  first: true
+  last: true
+  numberOfElements: 1
