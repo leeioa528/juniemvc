@@ -1,0 +1,80 @@
+get:
+  tags:
+    - BeerOrder
+  summary: Get shipment by id
+  parameters:
+    - name: orderId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+  responses:
+    '200':
+      description: Shipment found
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/BeerOrderShipmentResponse.yaml'
+    '404':
+      $ref: '../components/responses/Problem.yaml'
+put:
+  tags:
+    - BeerOrder
+  summary: Update shipment
+  parameters:
+    - name: orderId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/BeerOrderShipmentRequest.yaml'
+  responses:
+    '200':
+      description: Updated
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/BeerOrderShipmentResponse.yaml'
+    '404':
+      $ref: '../components/responses/Problem.yaml'
+delete:
+  tags:
+    - BeerOrder
+  summary: Delete shipment
+  parameters:
+    - name: orderId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+  responses:
+    '204':
+      description: No Content
+    '404':
+      $ref: '../components/responses/Problem.yaml'

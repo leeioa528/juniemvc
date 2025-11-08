@@ -77,6 +77,10 @@ paths:
     $ref: 'paths/customers.yaml'
   '/customers/{id}':
     $ref: 'paths/customers_{id}.yaml'
+  '/api/v1/beer-orders/{orderId}/shipments':
+    $ref: 'paths/api_v1_beer-orders_{orderId}_shipments.yaml'
+  '/api/v1/beer-orders/{orderId}/shipments/{id}':
+    $ref: 'paths/api_v1_beer-orders_{orderId}_shipments_{id}.yaml'
 components:
   securitySchemes:
     main_auth:
