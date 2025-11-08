@@ -256,4 +256,42 @@ class BeerControllerTest {
         mockMvc.perform(delete("/api/v1/beers/1"))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void testPatchBeer() throws Exception {
+        // Given
+        java.util.Map<String, Object> patchBody = new java.util.HashMap<>();
+        patchBody.put("price", 15.99);
+        BeerDto patched = BeerDto.builder()
+                .id(1)
+                .beerName("Test Beer")
+                .beerStyle("IPA")
+                .upc("123456")
+                .quantityOnHand(100)
+                .price(new java.math.BigDecimal("15.99"))
+                .build();
+        given(beerService.patchBeer(eq(1), any())).willReturn(java.util.Optional.of(patched));
+
+        // When/Then
+        mockMvc.perform(patch("/api/v1/beers/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(patchBody)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.price", is(15.99)));
+    }
+
+    @Test
+    void testPatchBeerNotFound() throws Exception {
+        // Given
+        java.util.Map<String, Object> patchBody = new java.util.HashMap<>();
+        patchBody.put("description", "new desc");
+        given(beerService.patchBeer(eq(1), any())).willReturn(java.util.Optional.empty());
+
+        // When/Then
+        mockMvc.perform(patch("/api/v1/beers/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(patchBody)))
+                .andExpect(status().isNotFound());
+    }
 }
