@@ -1,0 +1,36 @@
+title: BeerPatchRequest
+description: |
+  Request body for partially updating a Beer. All properties are optional.
+  Only the provided (non-null) fields will be updated. Server-managed fields
+  such as `id`, `version`, `createdDate`, and `updateDate` cannot be set here.
+type: object
+properties:
+  beerName:
+    type: string
+    description: Human-friendly name of the beer.
+    example: Galaxy Cat IPA
+  beerStyle:
+    type: string
+    description: Style of the beer (e.g., ALE, IPA, STOUT).
+    example: IPA
+  upc:
+    type: string
+    description: 13-digit Universal Product Code.
+    pattern: '^[0-9]{13}$'
+    example: "0123456789012"
+  quantityOnHand:
+    type: integer
+    format: int32
+    description: Number of units available in inventory (must be zero or positive).
+    minimum: 0
+    example: 120
+  price:
+    type: number
+    description: Unit price of the beer (must be strictly positive).
+    exclusiveMinimum: 0
+    example: 13.49
+  description:
+    type: string
+    description: Optional textual description of the beer.
+    maxLength: 255
+    example: A crisp, citrus-forward IPA with notes of pine and grapefruit.

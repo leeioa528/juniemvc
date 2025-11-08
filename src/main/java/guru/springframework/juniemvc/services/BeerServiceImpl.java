@@ -3,6 +3,7 @@ package guru.springframework.juniemvc.services;
 import guru.springframework.juniemvc.entities.Beer;
 import guru.springframework.juniemvc.mappers.BeerMapper;
 import guru.springframework.juniemvc.models.BeerDto;
+import guru.springframework.juniemvc.models.BeerPatchRequest;
 import guru.springframework.juniemvc.repositories.BeerRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -69,6 +70,17 @@ class BeerServiceImpl implements BeerService {
         return beerRepository.findById(id)
                 .map(existing -> {
                     beerMapper.updateEntityFromDto(beerDto, existing);
+                    Beer saved = beerRepository.save(existing);
+                    return beerMapper.toDto(saved);
+                });
+    }
+
+    @Override
+    @Transactional
+    public Optional<BeerDto> patchBeer(Integer id, BeerPatchRequest request) {
+        return beerRepository.findById(id)
+                .map(existing -> {
+                    beerMapper.patchEntityFromRequest(request, existing);
                     Beer saved = beerRepository.save(existing);
                     return beerMapper.toDto(saved);
                 });

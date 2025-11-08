@@ -53,6 +53,35 @@ put:
       $ref: '../components/responses/Problem.yaml'
     '404':
       $ref: '../components/responses/Problem.yaml'
+patch:
+  tags:
+    - Beer
+  summary: Partially update beer
+  description: Partially update an existing beer by its ID. Only provided fields will be updated.
+  operationId: patchBeer
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/BeerPatchRequest.yaml'
+        examples:
+          patch:
+            summary: Patch Beer example
+            value:
+              price: 13.49
+              description: Updated description
+  responses:
+    '200':
+      description: Patched
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Beer.yaml'
+    '400':
+      $ref: '../components/responses/Problem.yaml'
+    '404':
+      $ref: '../components/responses/Problem.yaml'
 delete:
   tags:
     - Beer
