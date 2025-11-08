@@ -46,6 +46,11 @@ properties:
     description: Unit price of the beer. Must be strictly positive.
     exclusiveMinimum: 0
     example: 12.99
+  description:
+    type: string
+    description: Optional textual description of the beer.
+    maxLength: 255
+    example: A crisp, citrus-forward IPA with notes of pine and grapefruit.
   createdDate:
     type: string
     format: date-time

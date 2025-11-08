@@ -37,6 +37,7 @@ public class Beer {
     private String upc;
     private Integer quantityOnHand;
     private BigDecimal price;
+    private String description; // optional textual description of the beer
 
     @CreationTimestamp
     @Column(updatable = false)
