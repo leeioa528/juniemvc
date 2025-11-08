@@ -144,4 +144,41 @@ class BeerRepositoryTest {
         assertThat(page.getContent().size()).isEqualTo(2);
         assertThat(page.getContent().get(0).getBeerName().toLowerCase()).contains("a");
     }
+
+    @Test
+    void testFindByBeerStyleContainingIgnoreCaseWithPageable() {
+        // Given
+        beerRepository.deleteAll();
+        beerRepository.saveAll(List.of(
+                Beer.builder().beerName("Alpha Ale").beerStyle("Ale").upc("1").price(new BigDecimal("5.00")).quantityOnHand(10).build(),
+                Beer.builder().beerName("Beta Bock").beerStyle("Bock").upc("2").price(new BigDecimal("6.00")).quantityOnHand(20).build(),
+                Beer.builder().beerName("Gamma IPA").beerStyle("IPA").upc("3").price(new BigDecimal("7.00")).quantityOnHand(30).build()
+        ));
+
+        // When
+        Page<Beer> page = beerRepository.findByBeerStyleContainingIgnoreCase("a", PageRequest.of(0, 5));
+
+        // Then
+        assertThat(page.getTotalElements()).isGreaterThanOrEqualTo(2);
+        assertThat(page.getContent().get(0).getBeerStyle().toLowerCase()).contains("a");
+    }
+
+    @Test
+    void testFindByNameAndStyleContainingIgnoreCaseWithPageable() {
+        // Given
+        beerRepository.deleteAll();
+        beerRepository.saveAll(List.of(
+                Beer.builder().beerName("Alpha Ale").beerStyle("Ale").upc("1").price(new BigDecimal("5.00")).quantityOnHand(10).build(),
+                Beer.builder().beerName("Alpha IPA").beerStyle("IPA").upc("2").price(new BigDecimal("6.00")).quantityOnHand(20).build(),
+                Beer.builder().beerName("Beta Ale").beerStyle("Ale").upc("3").price(new BigDecimal("7.00")).quantityOnHand(30).build()
+        ));
+
+        // When
+        Page<Beer> page = beerRepository.findByBeerNameContainingIgnoreCaseAndBeerStyleContainingIgnoreCase("Alpha", "Ale", PageRequest.of(0, 10));
+
+        // Then
+        assertThat(page.getTotalElements()).isEqualTo(1);
+        assertThat(page.getContent().get(0).getBeerName()).isEqualTo("Alpha Ale");
+        assertThat(page.getContent().get(0).getBeerStyle()).isEqualTo("Ale");
+    }
 }

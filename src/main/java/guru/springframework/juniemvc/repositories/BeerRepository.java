@@ -12,4 +12,8 @@ public interface BeerRepository extends JpaRepository<Beer, Integer> {
     // Spring Data JPA will implement basic CRUD operations
 
     Page<Beer> findByBeerNameContainingIgnoreCase(String beerName, Pageable pageable);
+
+    Page<Beer> findByBeerStyleContainingIgnoreCase(String beerStyle, Pageable pageable);
+
+    Page<Beer> findByBeerNameContainingIgnoreCaseAndBeerStyleContainingIgnoreCase(String beerName, String beerStyle, Pageable pageable);
 }

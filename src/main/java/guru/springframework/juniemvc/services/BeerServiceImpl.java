@@ -30,10 +30,20 @@ class BeerServiceImpl implements BeerService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<BeerDto> getBeers(String beanName, Pageable pageable) {
-        Page<Beer> page = (beanName == null || beanName.isBlank())
-                ? beerRepository.findAll(pageable)
-                : beerRepository.findByBeerNameContainingIgnoreCase(beanName, pageable);
+    public Page<BeerDto> getBeers(String beanName, String beerStyle, Pageable pageable) {
+        boolean hasName = beanName != null && !beanName.isBlank();
+        boolean hasStyle = beerStyle != null && !beerStyle.isBlank();
+
+        Page<Beer> page;
+        if (hasName && hasStyle) {
+            page = beerRepository.findByBeerNameContainingIgnoreCaseAndBeerStyleContainingIgnoreCase(beanName, beerStyle, pageable);
+        } else if (hasName) {
+            page = beerRepository.findByBeerNameContainingIgnoreCase(beanName, pageable);
+        } else if (hasStyle) {
+            page = beerRepository.findByBeerStyleContainingIgnoreCase(beerStyle, pageable);
+        } else {
+            page = beerRepository.findAll(pageable);
+        }
 
         List<BeerDto> content = page.getContent().stream().map(beerMapper::toDto).collect(Collectors.toList());
         return new PageImpl<>(content, pageable, page.getTotalElements());
