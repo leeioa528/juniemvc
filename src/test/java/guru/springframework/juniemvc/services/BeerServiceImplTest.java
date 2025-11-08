@@ -66,7 +66,7 @@ class BeerServiceImplTest {
         when(beerMapper.toDto(testBeer)).thenReturn(testBeerDto);
 
         // When
-        org.springframework.data.domain.Page<BeerDto> result = beerService.getBeers(null, pageable);
+        org.springframework.data.domain.Page<BeerDto> result = beerService.getBeers(null, null, pageable);
 
         // Then
         assertThat(result.getTotalElements()).isEqualTo(1);
@@ -86,13 +86,54 @@ class BeerServiceImplTest {
         when(beerMapper.toDto(testBeer)).thenReturn(testBeerDto);
 
         // When
-        org.springframework.data.domain.Page<BeerDto> result = beerService.getBeers("Test", pageable);
+        org.springframework.data.domain.Page<BeerDto> result = beerService.getBeers("Test", null, pageable);
 
         // Then
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).getBeerName()).isEqualTo("Test Beer");
         verify(beerRepository, times(1)).findByBeerNameContainingIgnoreCase("Test", pageable);
+        verify(beerRepository, never()).findAll(pageable);
+    }
+
+    @Test
+    void getBeersPagedWithStyleOnlyFilter() {
+        // Given
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 5);
+        org.springframework.data.domain.Page<Beer> repoPage = new org.springframework.data.domain.PageImpl<>(
+                java.util.List.of(testBeer), pageable, 1);
+        when(beerRepository.findByBeerStyleContainingIgnoreCase("IPA", pageable)).thenReturn(repoPage);
+        when(beerMapper.toDto(testBeer)).thenReturn(testBeerDto);
+
+        // When
+        org.springframework.data.domain.Page<BeerDto> result = beerService.getBeers(null, "IPA", pageable);
+
+        // Then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getBeerStyle()).isEqualTo("IPA");
+        verify(beerRepository, times(1)).findByBeerStyleContainingIgnoreCase("IPA", pageable);
+        verify(beerRepository, never()).findAll(pageable);
+    }
+
+    @Test
+    void getBeersPagedWithNameAndStyleFilter() {
+        // Given
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 5);
+        org.springframework.data.domain.Page<Beer> repoPage = new org.springframework.data.domain.PageImpl<>(
+                java.util.List.of(testBeer), pageable, 1);
+        when(beerRepository.findByBeerNameContainingIgnoreCaseAndBeerStyleContainingIgnoreCase("Test", "IPA", pageable)).thenReturn(repoPage);
+        when(beerMapper.toDto(testBeer)).thenReturn(testBeerDto);
+
+        // When
+        org.springframework.data.domain.Page<BeerDto> result = beerService.getBeers("Test", "IPA", pageable);
+
+        // Then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getBeerName()).isEqualTo("Test Beer");
+        assertThat(result.getContent().get(0).getBeerStyle()).isEqualTo("IPA");
+        verify(beerRepository, times(1)).findByBeerNameContainingIgnoreCaseAndBeerStyleContainingIgnoreCase("Test", "IPA", pageable);
         verify(beerRepository, never()).findAll(pageable);
     }
 

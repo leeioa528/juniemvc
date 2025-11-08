@@ -2,7 +2,7 @@ get:
   tags:
     - Beer
   summary: List beers
-  description: Retrieve beers with pagination. Optionally filter by beanName (matches beerName field, contains, case-insensitive).
+  description: Retrieve beers with pagination. Optionally filter by beanName (matches beerName field, contains, case-insensitive) and beerStyle (contains, case-insensitive).
   operationId: listBeers
   parameters:
     - name: page
@@ -26,6 +26,12 @@ get:
     - name: beanName
       in: query
       description: Optional filter that matches Beer.beerName (contains, case-insensitive).
+      required: false
+      schema:
+        type: string
+    - name: beerStyle
+      in: query
+      description: Optional filter that matches Beer.beerStyle (contains, case-insensitive).
       required: false
       schema:
         type: string
