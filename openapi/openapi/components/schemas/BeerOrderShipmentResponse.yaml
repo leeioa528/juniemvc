@@ -1,0 +1,34 @@
+type: object
+required:
+  - id
+  - beerOrderId
+  - shipmentDate
+  - carrier
+  - carrierNumber
+properties:
+  id:
+    type: integer
+    format: int32
+    example: 10
+  beerOrderId:
+    type: integer
+    format: int32
+    example: 123
+  shipmentDate:
+    type: string
+    format: date
+    example: 2025-01-15
+  carrier:
+    type: string
+    maxLength: 255
+    example: UPS
+  carrierNumber:
+    type: string
+    maxLength: 255
+    example: 1Z999AA10123456784
+  createdDate:
+    type: string
+    format: date-time
+  updateDate:
+    type: string
+    format: date-time

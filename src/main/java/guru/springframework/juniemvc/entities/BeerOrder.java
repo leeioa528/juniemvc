@@ -16,7 +16,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "beer_order")
-@ToString(exclude = "orderLines")
+@ToString(exclude = {"orderLines", "shipments"})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class BeerOrder {
 
@@ -37,6 +37,10 @@ public class BeerOrder {
     @OneToMany(mappedBy = "beerOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<BeerOrderLine> orderLines = new ArrayList<>();
+
+    @OneToMany(mappedBy = "beerOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<BeerOrderShipment> shipments = new ArrayList<>();
 
     @CreationTimestamp
     @Column(updatable = false)
