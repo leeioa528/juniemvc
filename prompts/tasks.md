@@ -5,81 +5,81 @@ Note: Mark tasks as done by changing [ ] to [x]. Follow the sequence Epic 1 → 
 ## Epic 1 — Project Foundation & Setup
 
 1.1 Create React app scaffolding (Vite + TS)
-- [ ] Create directory `src/main/frontend` and initialize Vite React SWC TS template.
-- [ ] Set package name to `juniemvc-frontend`.
+- [x] Create directory `src/main/frontend` and initialize Vite React SWC TS template.
+- [x] Set package name to `juniemvc-frontend`.
 - [ ] Verify dev server runs (`npm run dev`).
 
 1.2 Install core dependencies and UI stack
-- [ ] Install React 19, React Router, TypeScript, Vite and `@vitejs/plugin-react`.
-- [ ] Install styling dependencies: Tailwind CSS v4, PostCSS, Autoprefixer, `class-variance-authority`, `clsx`, `tailwind-merge`, `lucide-react`, and required Radix primitives.
+- [x] Install React 19, React Router, TypeScript, Vite and `@vitejs/plugin-react`.
+- [x] Install styling dependencies: Tailwind CSS v4, PostCSS, Autoprefixer, `class-variance-authority`, `clsx`, `tailwind-merge`, `lucide-react`, and required Radix primitives.
 - [ ] Add optional `tw-animate-css` if animations are required.
 
 1.3 Initialize Tailwind CSS v4
-- [ ] Create `src/styles/index.css` with Tailwind layer imports (v4 file-less config model).
-- [ ] Import styles in `src/main.tsx`.
-- [ ] Add basic CSS variables for light/dark if using shadcn tokens.
+- [x] Create `src/styles/index.css` with Tailwind layer imports (v4 file-less config model).
+- [x] Import styles in `src/main.tsx`.
+- [x] Add basic CSS variables for light/dark if using shadcn tokens.
 - [ ] Confirm Tailwind works in dev with a sample component.
 
 1.4 Initialize shadcn UI baseline
-- [ ] Add `cn()` utility in `src/lib/utils.ts`.
-- [ ] Create minimal design tokens (CSS vars) and a base Theme wrapper if needed.
-- [ ] Add initial components: Button, Input, Dialog, Table primitives (based on shadcn/Radix patterns).
-- [ ] Create a sandbox page with examples/stories for the primitives.
+- [x] Add `cn()` utility in `src/lib/utils.ts`.
+- [x] Create minimal design tokens (CSS vars) and a base Theme wrapper if needed.
+- [x] Add initial components: Button, Input, Dialog, Table primitives (based on shadcn/Radix patterns).
+- [x] Create a sandbox page with examples/stories for the primitives.
 
 1.5 Tooling setup (ESLint, Prettier, TS config)
-- [ ] Add ESLint config with `@typescript-eslint`, `eslint-plugin-react`, `eslint-plugin-react-hooks`, and Prettier integration (`eslint-config-prettier`).
-- [ ] Configure `tsconfig` paths and strict compiler options.
-- [ ] Add `.editorconfig` and Prettier config to normalize formatting.
+- [x] Add ESLint config with `@typescript-eslint`, `eslint-plugin-react`, `eslint-plugin-react-hooks`, and Prettier integration (`eslint-config-prettier`).
+- [x] Configure `tsconfig` paths and strict compiler options.
+- [x] Add `.editorconfig` and Prettier config to normalize formatting.
 - [ ] Optionally add Husky + lint-staged for changed-file linting on commit.
 - [ ] Ensure `npm run lint` works and passes.
 
 ## Epic 2 — Build Integration & Configuration
 
 2.1 Configure Vite for development
-- [ ] Setup dev server proxy to Spring Boot backend (proxy `/api` and `/actuator` to `http://localhost:8080`) with needed CORS headers.
-- [ ] Configure `.env`/`.env.development` for API base URL if required (prefer relative URLs with proxy in dev).
+- [x] Setup dev server proxy to Spring Boot backend (proxy `/api` and `/actuator` to `http://localhost:8080`) with needed CORS headers.
+- [x] Configure `.env`/`.env.development` for API base URL if required (prefer relative URLs with proxy in dev).
 - [ ] Confirm local dev hot reload and proxied requests function correctly.
 
 2.2 Configure Vite for production build output
-- [ ] Set `build.outDir` to `../resources/static` (relative to `src/main/frontend`).
-- [ ] Ensure `build.emptyOutDir = true` to clean `static` before build.
-- [ ] Verify `index.html` and hashed assets are emitted under `src/main/resources/static` after `npm run build`.
+- [x] Set `build.outDir` to `../resources/static` (relative to `src/main/frontend`).
+- [x] Ensure `build.emptyOutDir = true` to clean `static` before build.
+- [x] Verify `index.html` and hashed assets are emitted under `src/main/resources/static` after `npm run build`.
 
 2.3 Frontend scripts in package.json
-- [ ] Add scripts: `dev`, `build`, `preview`, `test`, `test:watch`, `lint`, `typecheck`, `api:gen`.
+- [x] Add scripts: `dev`, `build`, `preview`, `test`, `test:watch`, `lint`, `typecheck`, `api:gen`.
 - [ ] Ensure scripts run under Node 20/22 as assumed by the toolchain.
 
 2.4 Integrate with Maven build (frontend-maven-plugin)
-- [ ] Add `frontend-maven-plugin` executions in `pom.xml` for `npm ci` (phase `generate-resources`).
-- [ ] Add execution for `npm run build` (phase `prepare-package`).
-- [ ] Set `<workingDirectory>${project.basedir}/src/main/frontend</workingDirectory>`.
-- [ ] Verify `mvn -q -DskipTests package` builds the frontend and nests static assets into the JAR.
+- [x] Add `frontend-maven-plugin` executions in `pom.xml` for `npm ci` (phase `generate-resources`).
+- [x] Add execution for `npm run build` (phase `prepare-package`).
+- [x] Set `<workingDirectory>${project.basedir}/src/main/frontend</workingDirectory>`.
+- [x] Verify `mvn -q -DskipTests package` builds the frontend and nests static assets into the JAR.
 
 2.5 Configure Maven clean for frontend artifacts
-- [ ] Configure `maven-clean-plugin` to delete `src/main/resources/static/*` on `mvn clean`.
+- [x] Configure `maven-clean-plugin` to delete `src/main/resources/static/*` on `mvn clean`.
 - [ ] Optionally configure cleaning of `node_modules` and Vite cache via profiles for CI.
 - [ ] Verify `mvn clean` removes generated frontend artifacts safely.
 
 ## Epic 3 — API Integration & Data Layer
 
 3.1 Generate TypeScript client and models from OpenAPI
-- [ ] Add `openapi-typescript-codegen` and set output to `src/main/frontend/src/lib/api` (or `src/lib/api-client`).
-- [ ] Configure npm script `api:gen` pointing to `openapi/openapi/openapi.yaml`.
-- [ ] Choose generation pattern: (B) generate axios client directly for faster start.
-- [ ] Add README in the api folder documenting regeneration command and check-in policy.
-- [ ] Run `npm run api:gen` to generate the client and types.
+- [x] Add `openapi-typescript-codegen` and set output to `src/main/frontend/src/lib/api` (or `src/lib/api-client`).
+- [x] Configure npm script `api:gen` pointing to `openapi/openapi/openapi.yaml`.
+- [x] Choose generation pattern: (B) generate axios client directly for faster start.
+- [x] Add README in the api folder documenting regeneration command and check-in policy.
+- [x] Run `npm run api:gen` to generate the client and types.
 
 3.2 Create Axios instance with interceptors
-- [ ] Create `src/lib/axios.ts` exporting configured Axios instance.
-- [ ] Set base URL to relative `/api` (works with dev proxy and prod reverse proxy).
-- [ ] Add request interceptor to set JSON headers.
-- [ ] Add response interceptor to normalize error objects; consider retry/backoff for idempotent GETs.
-- [ ] Integrate axios instance with generated client (if using axios-based generation) via DI or configuration.
+- [x] Create `src/lib/axios.ts` exporting configured Axios instance.
+- [x] Set base URL to relative `/api` (works with dev proxy and prod reverse proxy).
+- [x] Add request interceptor to set JSON headers.
+- [x] Add response interceptor to normalize error objects; consider retry/backoff for idempotent GETs.
+- [x] Integrate axios instance with generated client (if using axios-based generation) via DI or configuration.
 
 3.3 Service layer per resource
-- [ ] Create `src/services/beers.service.ts` with list (pagination), getById, create, update, delete.
-- [ ] Create `src/services/customers.service.ts` with list, getById, create, update, delete.
-- [ ] Create `src/services/orders.service.ts` with list, getById, create, update (and delete if applicable).
+- [x] Create `src/services/beers.service.ts` with list (pagination), getById, create, update, delete.
+- [x] Create `src/services/customers.service.ts` with list, getById, create, update, delete.
+- [x] Create `src/services/orders.service.ts` with list, getById, create, update (and delete if applicable).
 - [ ] Map OpenAPI DTOs to view models where needed; re-export types for UI consumption.
 - [ ] Add unit tests for services mocking axios.
 

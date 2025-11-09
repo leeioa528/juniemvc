@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+/* Design tokens (light/dark) */
+:root {
+  --bg: 255 255 255;
+  --fg: 10 10 10;
+  --muted: 99 102 241; /* indigo-500 as sample */
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: 15 15 18;
+    --fg: 235 235 245;
+    --muted: 129 140 248; /* indigo-400 */
+  }
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: rgb(var(--bg));
+  color: rgb(var(--fg));
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
+    Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+/* Tailwind layers extensions as needed */
+@layer utilities {
+  .container-max {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+}

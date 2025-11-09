@@ -163,6 +163,22 @@ Write the task list to `prompts/tasks.md` file.
 
 -------------------------------------
 
-Complete the task list `prompts/tasks.md`. Inspect the `prompts/requirements.md` and `prompts/plan.md` and task.md (task list).
+Complete the task list `prompts/tasks.md`. Use information from `prompts/requirementsLee.md` and `prompts/plan.md` for
+additional context when completing the tasks.
+
 Implement the tasks in the task list. Focus on completing the tasks in order. Mark the task complete as it is done
 using [x]. As each step is completed, it is very important to update the task list mark and the task as done [x]. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
