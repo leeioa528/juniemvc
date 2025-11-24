@@ -30,6 +30,8 @@ export default function OrdersList() {
               <th className="py-2">ID</th>
               <th className="py-2">Customer</th>
               <th className="py-2">Status</th>
+              <th className="py-2">Total Items</th>
+              <th className="py-2">Created</th>
               <th className="py-2">Actions</th>
             </tr>
           </thead>
@@ -39,6 +41,8 @@ export default function OrdersList() {
                 <td className="py-2">{o.id}</td>
                 <td className="py-2">{o.customerId}</td>
                 <td className="py-2">{o.status}</td>
+                <td className="py-2">{Array.isArray(o.lines) ? o.lines.length : 0}</td>
+                <td className="py-2">{o.createdDate ?? ''}</td>
                 <td className="py-2">
                   <Link className="underline" to={`/orders/${o.id}`}>View</Link>
                 </td>

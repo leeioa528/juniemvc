@@ -237,7 +237,7 @@ export class BeerOrderService {
      * @returns any Page of shipments
      * @throws ApiError
      */
-    public static getApiV1BeerOrdersShipments({
+    public static listBeerOrderShipments({
         orderId,
         page,
         size = 20,
@@ -265,6 +265,9 @@ export class BeerOrderService {
                 'size': size,
                 'sort': sort,
             },
+            errors: {
+                400: `Problem`,
+            },
         });
     }
     /**
@@ -272,7 +275,7 @@ export class BeerOrderService {
      * @returns any Created
      * @throws ApiError
      */
-    public static postApiV1BeerOrdersShipments({
+    public static createBeerOrderShipment({
         orderId,
         requestBody,
     }: {
@@ -313,7 +316,7 @@ export class BeerOrderService {
      * @returns paths_1api_1v1_1beer_orders_1_orderId_1shipments_post_responses_201_content_application_1json_schema Shipment found
      * @throws ApiError
      */
-    public static getApiV1BeerOrdersShipments1({
+    public static getBeerOrderShipment({
         orderId,
         id,
     }: {
@@ -337,7 +340,7 @@ export class BeerOrderService {
      * @returns paths_1api_1v1_1beer_orders_1_orderId_1shipments_post_responses_201_content_application_1json_schema Updated
      * @throws ApiError
      */
-    public static putApiV1BeerOrdersShipments({
+    public static updateBeerOrderShipment({
         orderId,
         id,
         requestBody,
@@ -365,7 +368,7 @@ export class BeerOrderService {
      * @returns void
      * @throws ApiError
      */
-    public static deleteApiV1BeerOrdersShipments({
+    public static deleteBeerOrderShipment({
         orderId,
         id,
     }: {

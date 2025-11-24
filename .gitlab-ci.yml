@@ -1,0 +1,77 @@
+stages:
+  - openapi
+  - frontend
+  - backend
+  - package
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  NODE_ENV: production
+
+.cache_template: &cache
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+    - .m2/repository
+    - src/main/frontend/node_modules
+    - openapi/node_modules
+
+openapi:lint:
+  stage: openapi
+  image: node:22.11.0
+  cache: *cache
+  before_script:
+    - cd openapi
+    - npm ci
+  script:
+    - npm test
+  artifacts:
+    when: always
+    paths:
+      - openapi/dist/bundle.yaml
+    expire_in: 1 week
+  after_script:
+    - npm run build || true
+
+frontend:checks:
+  stage: frontend
+  image: node:22.11.0
+  cache: *cache
+  before_script:
+    - cd src/main/frontend
+    - npm ci
+  script:
+    - npm run lint
+    - npm run typecheck
+    - npm test
+
+backend:build:
+  stage: backend
+  image: maven:3.9.9-eclipse-temurin-21
+  cache: *cache
+  script:
+    - mvn -Pwith-frontend -B clean verify
+  artifacts:
+    paths:
+      - target/*.jar
+    expire_in: 1 week
+
+backend:tests:
+  stage: backend
+  image: maven:3.9.9-eclipse-temurin-21
+  cache: *cache
+  script:
+    - mvn -B test
+
+package:release:
+  stage: package
+  image: alpine:3.20
+  needs:
+    - job: backend:build
+    - job: openapi:lint
+  script:
+    - echo "Collecting artifacts"
+  artifacts:
+    paths:
+      - target/*.jar
+      - openapi/dist/bundle.yaml
+    expire_in: 2 weeks

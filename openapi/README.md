@@ -1,258 +1,84 @@
-# OpenAPI Definition Starter
+# OpenAPI Tooling
 
-## How to use this starter
+This directory contains the OpenAPI 3.1 specification and Redocly CLI tooling used to lint, preview, and bundle the API docs.
 
-![Click use template button](https://user-images.githubusercontent.com/3975738/92927304-12e35d80-f446-11ea-9bd3-a0f8a69792d0.png)
+- Entrypoint spec: `openapi/openapi/openapi.yaml`
+- Components: `openapi/openapi/components/**`
+- Paths: `openapi/openapi/paths/**` (flat file-per-path layout using `_` as `/` separator)
 
-## Working on your OpenAPI Definition
+## Prerequisites
+- Node.js 22.11.0 and npm 10.9.0 (matching the project toolchain)
 
-### Install
+## Install
+Run once (from repo root or this folder):
 
-1. Install [Node JS](https://nodejs.org/).
-2. Clone this repo and run `npm install` in the repo root.
-
-### Usage
-
-#### `npm start`
-Starts the reference docs preview server.
-
-#### `npm run build`
-Bundles the definition to the dist folder.
-
-#### `npm test`
-Validates the definition.
-
-## Contribution Guide
-
-Below is a sample contribution guide. The tools
-in the repository don't restrict you to any
-specific structure. Adjust the contribution guide
-to match your own structure. However, if you
-don't have a structure in mind, this is a
-good place to start.
-
-Update this contribution guide if you
-adjust the file/folder organization.
-
-The `.redocly.yaml` controls settings for various
-tools including the lint tool and the reference
-docs engine.  Open it to find examples and
-[read the docs](https://redocly.com/docs/cli/configuration/)
-for more information.
-
-
-### Schemas
-
-#### Adding Schemas
-
-1. Navigate to the `openapi/components/schemas` folder.
-2. Add a file named as you wish to name the schema.
-3. Define the schema.
-4. Refer to the schema using the `$ref` (see example below).
-
-##### Example Schema
-This is a very simple schema example:
-```yaml
-type: string
-description: The resource ID. Defaults to UUID v4
-maxLength: 50
-example: 4f6cf35x-2c4y-483z-a0a9-158621f77a21
-```
-This is a more complex schema example:
-```yaml
-type: object
-properties:
-  id:
-    description: The customer identifier string
-    readOnly: true
-    allOf:
-      - $ref: ./ResourceId.yaml
-  websiteId:
-    description: The website's ID
-    allOf:
-      - $ref: ./ResourceId.yaml
-  paymentToken:
-    type: string
-    writeOnly: true
-    description: |
-      A write-only payment token; if supplied, it will be converted into a
-      payment instrument and be set as the `defaultPaymentInstrument`. The
-      value of this property will override the `defaultPaymentInstrument`
-      in the case that both are supplied. The token may only be used once
-      before it is expired.
-  defaultPaymentInstrument:
-    $ref: ./PaymentInstrument.yaml
-  createdTime:
-    description: The customer created time
-    allOf:
-      - $ref: ./ServerTimestamp.yaml
-  updatedTime:
-    description: The customer updated time
-    allOf:
-      - $ref: ./ServerTimestamp.yaml
-  tags:
-    description: A list of customer's tags
-    readOnly: true
-    type: array
-    items:
-      $ref: ./Tags/Tag.yaml
-  revision:
-    description: >
-      The number of times the customer data has been modified.
-
-      The revision is useful when analyzing webhook data to determine if the
-      change takes precedence over the current representation.
-    type: integer
-    readOnly: true
-  _links:
-    type: array
-    description: The links related to resource
-    readOnly: true
-    minItems: 3
-    items:
-      anyOf:
-        - $ref: ./Links/SelfLink.yaml
-        - $ref: ./Links/NotesLink.yaml
-        - $ref: ./Links/DefaultPaymentInstrumentLink.yaml
-        - $ref: ./Links/LeadSourceLink.yaml
-        - $ref: ./Links/WebsiteLink.yaml
-  _embedded:
-    type: array
-    description: >-
-      Any embedded objects available that are requested by the `expand`
-      querystring parameter.
-    readOnly: true
-    minItems: 1
-    items:
-      anyOf:
-        - $ref: ./Embeds/LeadSourceEmbed.yaml
-
+```bash
+cd openapi
+npm ci
 ```
 
-If you have an JSON example, you can convert it to JSON schema using Redocly's [JSON to JSON schema tool](https://redocly.com/tools/json-to-json-schema/).
+## Commands
+- Preview docs locally (auto reload):
+  ```bash
+  npm start
+  # opens Redoc preview server for openapi/openapi/openapi.yaml
+  ```
+- Lint / validate the spec (required before commits/PRs):
+  ```bash
+  npm test
+  # runs: redocly lint
+  ```
+- Produce a single bundled file for distribution:
+  ```bash
+  npm run build
+  # outputs to: openapi/dist/bundle.yaml
+  ```
 
-##### Using the `$ref`
+## Authoring Tips
+- Keep one file per path item in `openapi/openapi/paths` and reference from `openapi.yaml` using `$ref`.
+- Put reusable schemas, headers, and responses in `openapi/openapi/components/**` and reference with relative paths.
+- Validate changes with `npm test` before committing.
 
-Notice in the complex example above the schema definition itself has `$ref` links to other schemas defined.
+## Frontend Client Generation
+From the frontend app (`src/main/frontend`), run:
 
-Here is a small excerpt with an example:
-
-```yaml
-defaultPaymentInstrument:
-  $ref: ./PaymentInstrument.yaml
+```bash
+npm run api:gen
 ```
 
-The value of the `$ref` is the path to the other schema definition.
+This generates TypeScript types and axios-based clients to `src/main/frontend/src/lib/api` using `openapi-typescript-codegen` against the entrypoint `openapi/openapi/openapi.yaml`.
 
-You may use `$ref`s to compose schema from other existing schema to avoid duplication.
 
-You will use `$ref`s to reference schema from your path definitions.
+## Contract-First Workflow (Source of Truth)
 
-#### Editing Schemas
+Follow this sequence for any API change to keep backend, frontend, and documentation in sync:
 
-1. Navigate to the `openapi/components/schemas` folder.
-2. Open the file you wish to edit.
-3. Edit.
+1) Update the spec
+- Edit `openapi/openapi/openapi.yaml` and any referenced files under `openapi/openapi/paths` and `openapi/openapi/components`.
+- Keep one file per path item; use `_` in filenames to represent `/` (e.g., `/users/{id}` → `paths/users_{id}.yaml`).
 
-### Paths
-
-#### Adding a Path
-
-1. Navigate to the `openapi/paths` folder.
-2. Add a new YAML file named like your URL endpoint except replacing `/` with `_` (or whichever character you prefer) and putting path parameters into curly braces like `{example}`.
-3. Add the path and a ref to it inside of your `openapi.yaml` file inside of the `openapi` folder.
-
-Example addition to the `openapi.yaml` file:
-```yaml
-'/customers/{id}':
-  $ref: './paths/customers_{id}.yaml'
+2) Lint/validate the spec
+```bash
+cd openapi
+npm test
+# runs: redocly lint against openapi/openapi/openapi.yaml
 ```
 
-Here is an example of a YAML file named `customers_{id}.yaml` in the `paths` folder:
-
-```yaml
-get:
-  tags:
-    - Customers
-  summary: Retrieve a list of customers
-  operationId: GetCustomerCollection
-  description: |
-    You can have a markdown description here.
-  parameters:
-    - $ref: ../components/parameters/collectionLimit.yaml
-    - $ref: ../components/parameters/collectionOffset.yaml
-    - $ref: ../components/parameters/collectionFilter.yaml
-    - $ref: ../components/parameters/collectionQuery.yaml
-    - $ref: ../components/parameters/collectionExpand.yaml
-    - $ref: ../components/parameters/collectionFields.yaml
-  responses:
-    '200':
-      description: A list of Customers was retrieved successfully
-      headers:
-        Rate-Limit-Limit:
-          $ref: ../components/headers/Rate-Limit-Limit.yaml
-        Rate-Limit-Remaining:
-          $ref: ../components/headers/Rate-Limit-Remaining.yaml
-        Rate-Limit-Reset:
-          $ref: ../components/headers/Rate-Limit-Reset.yaml
-        Pagination-Total:
-          $ref: ../components/headers/Pagination-Total.yaml
-        Pagination-Limit:
-          $ref: ../components/headers/Pagination-Limit.yaml
-        Pagination-Offset:
-          $ref: ../components/headers/Pagination-Offset.yaml
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: ../components/schemas/Customer.yaml
-        text/csv:
-          schema:
-            type: array
-            items:
-              $ref: ../components/schemas/Customer.yaml
-    '401':
-      $ref: ../components/responses/AccessForbidden.yaml
-  x-code-samples:
-    - lang: PHP
-      source:
-        $ref: ../code_samples/PHP/customers/get.php
-post:
-  tags:
-    - Customers
-  summary: Create a customer (without an ID)
-  operationId: PostCustomer
-  description: Another markdown description here.
-  requestBody:
-    $ref: ../components/requestBodies/Customer.yaml
-  responses:
-    '201':
-      $ref: ../components/responses/Customer.yaml
-    '401':
-      $ref: ../components/responses/AccessForbidden.yaml
-    '409':
-      $ref: ../components/responses/Conflict.yaml
-    '422':
-      $ref: ../components/responses/InvalidDataError.yaml
-  x-code-samples:
-    - lang: PHP
-      source:
-        $ref: ../code_samples/PHP/customers/post.php
+3) Generate frontend API clients and types
+```bash
+cd ../src/main/frontend
+npm run api:gen
+# outputs to: src/lib/api (axios-based clients + types via openapi-typescript-codegen)
 ```
 
-You'll see extensive usage of `$ref`s in this example to different types of components including schemas.
+4) Implement backend and UI against the generated types
+- Backend: implement/adjust controllers and services to match the contract.
+- Frontend: import clients/types from `src/lib/api` and build features without redefining shapes.
 
-You'll also notice `$ref`s to code samples.
+5) Build integration ensures freshness
+- The frontend `build` script runs `api:gen` before `vite build` (see `package.json`), ensuring generated code matches the latest spec when producing artifacts.
 
-### Code samples
-
-Automated code sample generations is enabled in the Redocly configuration file. Add manual code samples by the following process:
-
-1. Navigate to the `openapi/code_samples` folder.
-2. Navigate to the `<language>` (e.g. PHP) sub-folder.
-3. Navigate to the `path` folder, and add ref to the code sample.
-
-You can add languages by adding new folders at the appropriate path level.
-
-More details inside the `code_samples` folder README.
+PR checklist
+- [ ] Spec updated and `openapi/npm test` passes
+- [ ] Clients regenerated (`npm run api:gen`) and TypeScript compiles
+- [ ] Backend and UI changes align with the spec (no drift)

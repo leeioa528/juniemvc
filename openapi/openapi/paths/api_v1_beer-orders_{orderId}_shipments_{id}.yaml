@@ -2,6 +2,7 @@ get:
   tags:
     - BeerOrder
   summary: Get shipment by id
+  operationId: getBeerOrderShipment
   parameters:
     - name: orderId
       in: path
@@ -28,6 +29,7 @@ put:
   tags:
     - BeerOrder
   summary: Update shipment
+  operationId: updateBeerOrderShipment
   parameters:
     - name: orderId
       in: path
@@ -60,6 +62,7 @@ delete:
   tags:
     - BeerOrder
   summary: Delete shipment
+  operationId: deleteBeerOrderShipment
   parameters:
     - name: orderId
       in: path

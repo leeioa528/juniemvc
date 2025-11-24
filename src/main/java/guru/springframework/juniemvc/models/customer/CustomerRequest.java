@@ -15,25 +15,25 @@ import lombok.Setter;
 @Builder
 public class CustomerRequest {
 
-    @NotBlank(message = "Name is required")
+    @NotBlank(message = "{customer.name.required}")
     private String name;
 
-    @Email(message = "Email must be valid")
+    @Email(message = "{customer.email.valid}")
     private String email;
 
     private String phoneNumber;
 
-    @NotBlank(message = "Address line 1 is required")
+    @NotBlank(message = "{customer.address1.required}")
     private String addressLine1;
 
     private String addressLine2;
 
-    @NotBlank(message = "City is required")
+    @NotBlank(message = "{customer.city.required}")
     private String city;
 
-    @NotBlank(message = "State is required")
+    @NotBlank(message = "{customer.state.required}")
     private String state;
 
-    @NotBlank(message = "Postal code is required")
+    @NotBlank(message = "{customer.postal.required}")
     private String postalCode;
 }

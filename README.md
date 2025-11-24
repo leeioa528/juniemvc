@@ -1,6 +1,25 @@
 # JetBrains Junie
 ## Spring 6 Rest MVC
 
+> Frontend Guide: See the definitive React/Vite frontend guide at prompts/requirements.md.
+
+### Frontend Quick Start
+- Start backend: run the Spring Boot app on http://localhost:8080.
+- Start frontend dev server:
+  - cd src/main/frontend
+  - npm ci
+  - npm run dev
+- App runs at http://localhost:5173 and proxies /api and /actuator to the backend.
+
+### Build Full App (Backend JAR embedding Frontend)
+- mvn -Pwith-frontend clean package
+- This builds the frontend (Vite) and packages the assets under src/main/resources/static inside the Spring Boot JAR.
+
+### OpenAPI and API Client
+- Spec entrypoint: openapi/openapi/openapi.yaml
+- Validate spec: cd openapi && npm ci && npm test
+- Generate frontend API client: cd src/main/frontend && npm run api:gen
+
 ### DTO-Based API and MapStruct
 This application now separates the Web layer from the Persistence layer using Data Transfer Objects (DTOs):
 

@@ -1,7 +1,9 @@
 package guru.springframework.juniemvc.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
+@Validated
 @ConfigurationProperties(prefix = "shipment.api")
 public class ShipmentApiProperties {
     /**

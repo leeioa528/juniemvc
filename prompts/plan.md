@@ -1,471 +1,325 @@
-# React Frontend Implementation Plan (Epics → User Stories/Tasks)
-
-Source of truth: prompts/requirementsLee.md and OpenAPI spec at openapi/openapi/openapi.yaml. Target location for the frontend app: src/main/frontend. Production assets served by Spring Boot from src/main/resources/static.
-
-Note on sequencing: Epics 1 → 3 are foundational and largely sequential. Epics 4–6 can proceed in parallel once the API client and Axios instance exist. Epic 7 runs continuously but has concrete deliverables.
-
-
-## Epic 1 — Project Foundation & Setup
-Outcome: A Vite + React + TypeScript app initialized under src/main/frontend with Tailwind and shadcn UI ready, standard tooling in place.
-
-1.1 Create React app scaffolding (Vite + TS)
-- Tasks:
-  - Create directory src/main/frontend and initialize Vite React SWC TS template.
-  - Set package name to "juniemvc-frontend".
-  - Verify dev server runs (`npm run dev`).
-- Deliverables:
-  - src/main/frontend with index.html, vite.config.ts, tsconfig.json, src/main.tsx.
-
-1.2 Install core dependencies and UI stack
-- Tasks:
-  - Install React 19, React Router, TypeScript, Vite + plugin-react.
-  - Install styling dependencies: Tailwind CSS v4, PostCSS, Autoprefixer, class-variance-authority, clsx, tailwind-merge, lucide-react, Radix primitives used by shadcn components.
-  - Add optional tw-animate-css if animations are required.
-- Deliverables:
-  - Updated package.json with deps and devDeps as in requirementsLee.md.
-
-1.3 Initialize Tailwind CSS v4
-- Tasks:
-  - Create src/styles/index.css with Tailwind layer imports (v4’s file-less config model).
-  - Import styles in src/main.tsx.
-  - Add basic CSS variables for light/dark if using shadcn tokens.
-- Deliverables:
-  - Tailwind working in dev (inspect with a sample component).
-
-1.4 Initialize shadcn UI baseline
-- Tasks:
-  - Add utility helpers (cn()) in src/lib/utils.ts.
-  - Create minimal design tokens (CSS vars) and a base Theme wrapper if needed.
-  - Add initial components: Button, Input, Dialog, Table primitives (either hand-rolled or from shadcn patterns using Radix primitives).
-- Deliverables:
-  - Reusable UI primitives folder in src/components/ui/* with stories/examples in a sandbox page.
-
-1.5 Tooling setup (ESLint, Prettier, TS config)
-- Tasks:
-  - Add ESLint config with @typescript-eslint, react, react-hooks and Prettier integration (eslint-config-prettier).
-  - Configure tsconfig paths and strict compiler options.
-  - Add .editorconfig and Prettier config to normalize formatting.
-  - Add husky + lint-staged (optional) to enforce changed-file linting on commit.
-- Deliverables:
-  - Lint passes; `npm run lint` script working.
-
-
-## Epic 2 — Build Integration & Configuration
-Outcome: Vite configured for dev proxy to Spring Boot; production build emitted into src/main/resources/static; wired into Maven lifecycle.
-
-2.1 Configure Vite for development
-- Tasks:
-  - Setup dev server proxy to Spring Boot backend (e.g., proxy /api and /actuator to http://localhost:8080) with CORS headers as needed.
-  - Configure env variables via .env/.env.development for API base URL if required; prefer relative URLs with proxy in dev.
-- Deliverables:
-  - vite.config.ts proxy section; local dev hot reload confirmed.
-
-2.2 Configure Vite for production build output
-- Tasks:
-  - Set build.outDir to ../resources/static (relative to src/main/frontend) so Vite outputs assets that Spring Boot will serve.
-  - Ensure build.emptyOutDir = true to clean static before build (coordinated with Maven clean plugin too).
-  - Verify index.html and assets hashed filenames are emitted under static/.
-- Deliverables:
-  - Production build artifacts appear in src/main/resources/static after `npm run build`.
-
-2.3 Frontend scripts in package.json
-- Tasks:
-  - Add scripts: dev, build, preview, test, test:watch, lint, typecheck, api:gen.
-  - Add cross-platform environment handling (Node 20/22 assumed by toolchain).
-- Deliverables:
-  - package.json scripts ready for devs and CI.
-
-2.4 Integrate with Maven build (frontend-maven-plugin)
-- Tasks:
-  - In pom.xml, add frontend-maven-plugin executions for `install node and npm` (if desired) and `npm ci` + `npm run build` bound to Maven phases (`generate-resources` or `prepare-package`).
-  - Set workingDirectory to ${project.basedir}/src/main/frontend.
-  - Prefer `npm ci` for reproducibility.
-- Deliverables:
-  - `mvn -q -DskipTests package` builds frontend and nests static assets into the JAR.
-
-2.5 Configure Maven clean for frontend artifacts
-- Tasks:
-  - Add maven-clean-plugin configuration to delete src/main/resources/static/* on `mvn clean`.
-  - Optionally clean node_modules and vite cache via plugin profiles if desired for CI.
-- Deliverables:
-  - `mvn clean` removes generated frontend artifacts safely.
-
-
-## Epic 3 — API Integration & Data Layer
-Outcome: Typed client generated from OpenAPI; Axios instance with interceptors; service modules encapsulate data access per resource.
-
-3.1 Generate TypeScript client and models from OpenAPI
-- Tasks:
-  - Use openapi-typescript-codegen to generate into src/main/frontend/src/lib/api (or src/lib/api-client).
-  - Configure npm script `api:gen` pointing to openapi/openapi/openapi.yaml; set `--useOptions`, `--exportCore false` if wrapping via Axios, or `--client axios` if using generated client.
-  - Decide pattern: (A) generate fetch-based client and wrap with Axios, or (B) generate axios client directly. Choose B for faster start.
-  - Add README in api folder documenting regen command.
-- Deliverables:
-  - Generated client code under src/lib/api, not checked in or checked-in per team policy (documented).
-
-3.2 Create Axios instance with interceptors
-- Tasks:
-  - Create src/lib/axios.ts exporting configured Axios instance.
-  - Base URL: use relative `/api` for dev with proxy; in prod same path served by Boot reverse proxy.
-  - Add request interceptor to set JSON headers; add response interceptor for unified error objects; optional retry/backoff for idempotent GETs.
-  - Integrate with generated client if using axios-based generation via dependency injection of axios instance.
-- Deliverables:
-  - Shared axios instance with robust error handling.
-
-3.3 Service layer per resource
-- Tasks:
-  - Create modules: src/services/beers.service.ts, customers.service.ts, orders.service.ts.
-  - Each exposes functions for list (with pagination), getById, create, update, delete (where applicable).
-  - Map OpenAPI request/response DTOs to view models when needed; keep types re-exported for UI consumption.
-- Deliverables:
-  - Stable API facade for UI; unit tests mocking axios.
-
-
-## Epic 4 — Application Architecture & UI Shell
-Outcome: App routing, layout, navigation, and shared UX primitives in place.
-
-4.1 Routing scaffold with nested layouts
-- Tasks:
-  - Add React Router v7 routes: `/`, `/beers`, `/beers/:id`, `/customers`, `/customers/:id`, `/orders`, `/orders/:id`.
-  - Use a top-level `AppLayout` with header/sidebar and an `Outlet` for nested routes.
-  - Add a NotFound route.
-- Deliverables:
-  - src/app/routes with route elements and lazy-loaded pages (code-splitting).
-
-4.2 AppLayout and navigation
-- Tasks:
-  - Implement `AppLayout` using shadcn components: top nav, sidebar, breadcrumb, main content container.
-  - Include global toasts area (Radix Toast) and a ConfirmDialog portal.
-  - Add active route highlighting and accessible skip links.
-- Deliverables:
-  - Consistent layout and navigation across pages.
-
-4.3 Shared hooks and utilities
-- Tasks:
-  - Create hooks: usePaginatedQuery, useDebouncedValue, useBeers/useCustomers/useOrders (wrapping services), useApiError.
-  - Add helpers for date/number formatting and query param sync.
-- Deliverables:
-  - Hooks with tests and examples.
-
-
-## Epic 5 — Feature Implementation: Beers (CRUD)
-Outcome: Complete Beer management UX with pagination.
-
-5.1 List Beers page with pagination and filters
-- Tasks:
-  - Table view using shadcn Table; columns: name, style, price, upc, quantityOnHand (as available in backend), actions.
-  - Pagination controls bound to backend query params; optional client-side page size control.
-  - Optional text filter (name contains) if backend supports.
-- Deliverables:
-  - Route `/beers` functional; empty-state and loading-skeletons implemented.
-
-5.2 Beer details page
-- Tasks:
-  - `/beers/:id` shows key fields; includes Edit and Delete actions.
-  - Handle 404 by redirecting to list with toast.
-- Deliverables:
-  - Details page with error states covered.
-
-5.3 Create/Update Beer forms
-- Tasks:
-  - Reusable BeerForm component using shadcn Form primitives with Zod validation (install zod + @hookform/resolvers + react-hook-form).
-  - Support create (dialog or page) and update (dialog/page) flows; optimistic UI optional.
-- Deliverables:
-  - Form validation, submit, success/error toasts wired to services.
-
-5.4 Delete Beer
-- Tasks:
-  - Add ConfirmDialog before delete; show toast on success; refresh list.
-- Deliverables:
-  - Delete flow complete and covered by tests.
-
-
-## Epic 6 — Feature Implementation: Customers (CRUD)
-Outcome: Customer management UX.
-
-6.1 List Customers page
-- Tasks:
-  - Table with basic fields (name, email, phone, etc. as per API); pagination.
-- Deliverables:
-  - Route `/customers` functional.
-
-6.2 Customer details page
-- Tasks:
-  - `/customers/:id` detail view; link to related orders if available.
-- Deliverables:
-  - Details implemented with error handling.
-
-6.3 Create/Update/Delete Customer
-- Tasks:
-  - CustomerForm with validation (react-hook-form + zod).
-  - Create and update flows; delete with confirmation.
-- Deliverables:
-  - Full CRUD flows with toasts and redirects.
-
-
-## Epic 7 — Feature Implementation: Beer Orders
-Outcome: Order listing, detail, and creation/update flows.
-
-7.1 List Orders page
-- Tasks:
-  - Table of orders: id, customer, status, total items, created date; pagination and basic filtering (status/customer).
-- Deliverables:
-  - Route `/orders` functional.
-
-7.2 Order details
-- Tasks:
-  - `/orders/:id` shows line items, totals, status history (as available), and actions.
-- Deliverables:
-  - Detail view with loading and error states.
-
-7.3 Create/Update Order
-- Tasks:
-  - Order builder form: select customer, add/remove beer line items (beer autocomplete + quantity), compute totals.
-  - Persist via service; show validation errors from backend.
-- Deliverables:
-  - End-to-end order creation/update UX.
-
-
-## Epic 8 — Quality, Testing, and DX
-Outcome: Reliable test environment, consistent coding standards, and CI-ready scripts.
-
-8.1 Testing setup
-- Tasks:
-  - Install Vitest, @testing-library/react, @testing-library/user-event, @testing-library/jest-dom, jsdom.
-  - Configure vitest in vite.config.ts or vitest.config.ts (environment: jsdom, setup file for RTL matchers).
-  - Add example tests for a component, a hook (with MSW or axios mock), and a service.
-- Deliverables:
-  - `npm test` runs and reports coverage via v8 provider.
-
-8.2 ESLint & Prettier enforcement
-- Tasks:
-  - Add rules for React 19, hooks, typescript-eslint recommended; enable import/order rule optionally.
-  - Add `npm run lint` and `npm run format` scripts; make CI fail on lint errors.
-- Deliverables:
-  - Clean lint baseline and formatting consistency.
-
-8.3 Mocking and API test strategy
-- Tasks:
-  - Choose between MSW for component/integration tests or axios-mock-adapter for service tests; implement one example each.
-- Deliverables:
-  - Documented approach and sample specs.
-
-
-## Epic 9 — Documentation & Workflow
-Outcome: Clear developer workflow, local dev steps, and production build docs.
-
-9.1 Developer workflow guide (.junie/guidelines.md)
-- Tasks:
-  - Document local setup, scripts, code conventions, directory layout, and PR checklist.
-  - Include guidance on generating the API client, when to regenerate, and how to reconcile breaking changes.
-  - Note on Spring Boot guidelines (constructor injection, package-private controllers) for any backend touches needed by the frontend.
-- Deliverables:
-  - New/updated .junie/guidelines.md.
-
-9.2 Local dev and production build verification
-- Tasks:
-  - Document concurrent dev workflow: run backend on :8080, frontend vite dev server on :5173 with proxy.
-  - Document production build path: `mvn -q package` produces JAR that serves UI at `http://localhost:8080/`.
-  - Include troubleshooting tips (CORS, proxy mismatches, 404 on refresh → configure SPA fallback in Spring if needed).
-- Deliverables:
-  - README section or doc in prompts/ confirming both workflows.
-
-
-## Cross-Cutting Non-Functional Requirements
-- Accessibility: Use semantic HTML, ARIA roles from Radix, keyboard navigation, focus management on route/dialog open.
-- Performance: Code-split routes, use React.lazy/Suspense, leverage React Router data APIs where suitable; cache list queries as appropriate.
-- Error Handling: Centralize API error normalization; show user-friendly messages via toasts and page-level error boundaries.
-- i18n (optional): Prepare for i18n by externalizing strings where feasible.
-
-
-## Milestones & Suggested Order
-1) Epics 1–2 (Foundation + Build Integration)
-2) Epic 3 (API Client + Axios + Services)
-3) Epic 4 (Routing + Layout + Hooks)
-4) Epic 5 (Beers CRUD)
-5) Epic 6 (Customers CRUD)
-6) Epic 7 (Orders)
-7) Epics 8–9 (Quality + Docs)
-
-
-## Acceptance Criteria Summary (per Epic)
-- Epic 1: `npm run dev` shows a styled skeleton page using shadcn components; lint passes.
-- Epic 2: `mvn package` places built assets under src/main/resources/static and serves them from the JAR.
-- Epic 3: `npm run api:gen` generates types; services call backend successfully; shared axios instance handles errors globally.
-- Epic 4: Navigable shell with working routes and NotFound; layout consistent.
-- Epic 5–7: CRUD flows are functional end-to-end with validation, toasts, and loading states.
-- Epic 8: `npm test` executes example unit/integration tests with coverage; lint/format enforced.
-- Epic 9: Clear docs exist for both dev and production workflows.
-
-
-## Implementation Details & Snippets
-
-A) Example vite.config.ts essentials
-```ts
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'node:path'
-
-export default defineConfig(({ mode }) => ({
-  plugins: [react()],
-  root: '.',
-  server: {
-    port: 5173,
-    strictPort: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-      },
-      '/actuator': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-      },
-    },
-  },
-  build: {
-    outDir: path.resolve(__dirname, '../resources/static'),
-    emptyOutDir: true,
-  },
-  test: {
-    environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
-  },
-}))
-```
-
-B) Axios instance (src/lib/axios.ts)
-```ts
-import axios from 'axios'
-
-export const api = axios.create({
-  baseURL: '/api',
-  withCredentials: false,
-  headers: { 'Content-Type': 'application/json' },
-})
-
-api.interceptors.response.use(
-  (res) => res,
-  (error) => {
-    const status = error?.response?.status
-    const message = error?.response?.data?.detail || error.message
-    return Promise.reject({ status, message, original: error })
-  }
-)
-```
-
-C) OpenAPI client generation script (package.json)
-```json
-{
-  "scripts": {
-    "api:gen": "openapi-typescript-codegen --input ../../../../openapi/openapi/openapi.yaml --output ./src/lib/api --client axios",
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
-  }
-}
-```
-
-D) Maven frontend-maven-plugin snippet (pom.xml)
-```xml
-<plugin>
-  <groupId>com.github.eirslett</groupId>
-  <artifactId>frontend-maven-plugin</artifactId>
-  <version>1.15.0</version>
-  <configuration>
-    <workingDirectory>${project.basedir}/src/main/frontend</workingDirectory>
-  </configuration>
-  <executions>
-    <execution>
-      <id>npm-ci</id>
-      <goals><goal>npm</goal></goals>
-      <phase>generate-resources</phase>
-      <configuration>
-        <arguments>ci</arguments>
-      </configuration>
-    </execution>
-    <execution>
-      <id>npm-build</id>
-      <goals><goal>npm</goal></goals>
-      <phase>prepare-package</phase>
-      <configuration>
-        <arguments>run build</arguments>
-      </configuration>
-    </execution>
-  </executions>
-</plugin>
-```
-
-E) Maven clean plugin to remove generated static assets
-```xml
-<plugin>
-  <artifactId>maven-clean-plugin</artifactId>
-  <version>3.3.2</version>
-  <configuration>
-    <filesets>
-      <fileset>
-        <directory>${project.basedir}/src/main/resources/static</directory>
-      </fileset>
-    </filesets>
-  </configuration>
-</plugin>
-```
-
-F) Example services (src/services/beers.service.ts)
-```ts
-import { api } from '@/lib/axios'
-import type { BeerDto, CreateBeerRequest, UpdateBeerRequest } from '@/lib/api'
-
-export async function listBeers(params: { page?: number; size?: number; q?: string } = {}) {
-  const res = await api.get<BeerDto[]>(`/beers`, { params })
-  return res.data
-}
-
-export async function getBeer(id: string) {
-  const res = await api.get<BeerDto>(`/beers/${id}`)
-  return res.data
-}
-
-export async function createBeer(payload: CreateBeerRequest) {
-  const res = await api.post<BeerDto>(`/beers`, payload)
-  return res.data
-}
-
-export async function updateBeer(id: string, payload: UpdateBeerRequest) {
-  const res = await api.put<BeerDto>(`/beers/${id}`, payload)
-  return res.data
-}
-
-export async function deleteBeer(id: string) {
-  await api.delete(`/beers/${id}`)
-}
-```
-
-G) Router skeleton (src/app/routes/index.tsx)
-```tsx
-import { createBrowserRouter } from 'react-router-dom'
-import { AppLayout } from '@/app/layout/AppLayout'
-import { BeersPage } from '@/pages/beers/BeersPage'
-import { BeerDetailsPage } from '@/pages/beers/BeerDetailsPage'
-// ... other imports
-
-export const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <AppLayout />,
-    children: [
-      { index: true, element: <BeersPage /> },
-      { path: 'beers', element: <BeersPage /> },
-      { path: 'beers/:id', element: <BeerDetailsPage /> },
-      // customers, orders...
-      { path: '*', element: <div>Not Found</div> },
-    ],
-  },
-])
-```
-
-This plan provides a concrete, sequential roadmap with code-ready snippets aligned with the repository’s structure and the requirements document. Developers can pick up each epic and complete the listed tasks to deliver a production-ready frontend integrated with the Spring Boot build. 
+# Project Improvement Plan — juniemvc
+
+Date: 2025-11-09
+Owner: Team Juniemvc
+Target: Deliver a production-ready Spring Boot + React application, aligned with the provided engineering guidelines and the current repository setup.
+
+---
+
+## Milestones (High-Level Roadmap)
+
+1. M1: Foundation & Tooling (1–2 weeks)
+2. M2: API & Data Layer (1 week)
+3. M3: Application Shell & Navigation (1 week)
+4. M4: Feature Epics (CRUD for core resources) (3–5 weeks)
+5. M5: Quality: Testing, CI, and Observability (1–2 weeks)
+6. M6: Security, Config, and Operations (1–2 weeks)
+7. M7: Documentation & Developer Experience (ongoing)
+
+Each milestone has exit criteria and measurable deliverables.
+
+---
+
+## Cross-Cutting Standards (Apply in all work)
+
+- Spring Boot Guidelines (constructor injection, package-private components, typed properties, transaction boundaries, OSIV disabled, DTOs, REST design, centralized exception handling, actuator hardening, i18n, Testcontainers, random ports for ITs, logging hygiene, Flyway migrations).
+- OpenAPI authoring and validation (Redocly CLI, modular refs; keep spec current with implementation).
+- Frontend principles: TypeScript strict mode, ESLint + Prettier, Vitest + RTL, generated API clients, consistent error handling, accessible UI.
+
+---
+
+## Epic 1 — Project Foundation & Setup (M1)
+
+Goal: Ensure repo layout, build, and dev workflows are consistent and repeatable.
+
+Tasks:
+- E1.1 Verify frontend location and Vite baseline
+  - Confirm `src/main/frontend` contains a Vite React TS app, strict TS config, and `vite.config.ts` outputs to `../resources/static` for prod.
+  - Add Tailwind v4 entry `src/main/frontend/src/styles/globals.css` and import in `main.tsx` if missing.
+- E1.2 NPM scripts and Node versions
+  - In `src/main/frontend/package.json`, standardize scripts: `dev`, `build`, `preview`, `test`, `lint`, `format`, `api:gen`.
+  - Align Node/NPM versions with `frontend-maven-plugin` in `pom.xml` (currently Node v22.11.0, npm 10.9.0). Document rationale.
+- E1.3 Maven integration
+  - Keep `with-frontend` Maven profile wiring `ci` and `build` steps using `frontend-maven-plugin`.
+  - Verify `maven-clean-plugin` deletes `src/main/resources/static/**`.
+- E1.4 Backend dev profile & CORS
+  - Configure dev CORS (if needed) for API routes; rely on Vite proxy during dev.
+- E1.5 Git hygiene
+  - Ensure `.gitignore` excludes `node_modules`, `src/main/resources/static`, and local tool caches.
+
+Exit criteria:
+- `mvn -Pwith-frontend clean package` produces a JAR that serves the Vite build.
+- `npm run dev` runs the frontend with API proxy to Spring Boot.
+
+---
+
+## Epic 2 — OpenAPI & API Client Strategy (M2)
+
+Goal: Single source of truth for the API with generated TS client.
+
+Tasks:
+- E2.1 Redocly toolchain
+  - From `openapi/` run `npm ci` once and `npm test` (Redocly lint) to validate `openapi/openapi/openapi.yaml` and referenced files.
+  - Add simple `README` in `openapi/` explaining `npm start`, `npm run build`, `npm test` usage.
+- E2.2 API client generation
+  - Choose a generator (e.g., `openapi-typescript` + custom axios wrapper or `openapi-generator-cli typescript-axios`).
+  - Implement script `api:gen` that outputs to `src/main/frontend/src/lib/api` with immutable types and clients.
+  - Gate commit by regenerating on spec change.
+- E2.3 Contract-first discipline
+  - Workflow: Update spec → lint → generate clients → implement backend & UI.
+
+Exit criteria:
+- `npm run api:gen` produces typed clients and models, imported by services.
+- Redocly `npm test` lints clean.
+
+---
+
+## Epic 3 — Application Shell & Navigation (M3)
+
+Goal: Create a robust, scalable app shell with routing and shared layout.
+
+Tasks:
+- E3.1 Routing
+  - Configure React Router with nested routes, error boundaries, and lazy routes.
+- E3.2 Layout
+  - Implement `AppLayout` with header, nav, content area, and footer; ensure responsiveness.
+- E3.3 State & theming
+  - Add basic theme tokens via Tailwind; optional dark mode toggle.
+- E3.4 Error & loading UX
+  - Global error boundary and toast/notification pattern.
+
+Exit criteria:
+- Navigable shell with placeholder pages for Beers, Customers, Beer Orders.
+
+---
+
+## Epic 4 — Data Layer & Services (M2–M4)
+
+Goal: Centralized API access, error handling, caching primitives.
+
+Tasks:
+- E4.1 Axios instance
+  - Implement a shared axios instance with base URL, interceptors for auth (if any), error normalization, and timeouts.
+- E4.2 Services per resource
+  - `services/beers.ts`, `services/customers.ts`, `services/orders.ts` using generated clients; expose CRUD functions.
+- E4.3 Hooks
+  - `hooks/useBeers`, `useCustomers`, `useOrders` encapsulate fetching state; consider React Query if desired.
+
+Exit criteria:
+- Feature pages consume hooks/services only; no direct axios usage in components.
+
+---
+
+## Epic 5 — Feature Delivery (CRUD) (M4)
+
+Goal: Implement core features incrementally. Use DTOs and adhere to REST design.
+
+Resources to align with: Spring controllers, service layer, MapStruct mappers, and Flyway schema.
+
+Tasks per feature (repeatable pattern):
+- E5.X.1 Backend API check
+  - Validate endpoints exist in OpenAPI; adjust spec if needed; regenerate clients.
+- E5.X.2 DTOs & Mappers
+  - Ensure no entity leakage to controllers. Use records/DTOs + MapStruct.
+- E5.X.3 Transactions
+  - Annotate service methods: `@Transactional` or `@Transactional(readOnly = true)`.
+- E5.X.4 Controller contracts
+  - Return `ResponseEntity<T>`; proper status codes (201, 200, 204, 404, 400); pagination for collections where applicable.
+- E5.X.5 Frontend pages & components
+  - List view (with pagination/sort if supported), detail view, create/edit forms, delete flows, optimistic UX.
+- E5.X.6 Validation & errors
+  - Jakarta validation on requests; propagate `ProblemDetails` from global exception handler; show user-friendly errors.
+
+Initial feature order:
+1) Beers, 2) Customers, 3) Beer Orders
+
+Exit criteria:
+- Full CRUD for the three resources with E2E happy paths tested.
+
+---
+
+## Epic 6 — Persistence & Migrations (M1–M4)
+
+Goal: Reliable DB schema evolution with Flyway.
+
+Tasks:
+- E6.1 Verify Flyway setup
+  - Place SQL under `src/main/resources/db/migration/` using `V…__…` naming; H2-compatible syntax for local.
+- E6.2 Schema ownership
+  - When adding FKs: add column first, then `ALTER TABLE` for constraint (per guideline).
+- E6.3 Seed/reference data
+  - Optional: `R__` repeatables for views or reference data.
+
+Exit criteria:
+- App boots clean with Flyway applying all migrations from scratch.
+
+---
+
+## Epic 7 — Exception Handling & OSIV (M1–M3)
+
+Goal: Predictable error semantics and performance-safe JPA usage.
+
+Tasks:
+- E7.1 Global exception handler
+  - Implement `@RestControllerAdvice` returning RFC 9457 `ProblemDetails` for common exceptions and validation errors.
+- E7.2 Disable OSIV
+  - Ensure `spring.jpa.open-in-view=false` in application properties; remove reliance on lazy loads in views; use fetch joins or projections.
+
+Exit criteria:
+- Consistent error JSON; no lazy-loading at serialization time.
+
+---
+
+## Epic 8 — Configuration & Security (M6)
+
+Goal: Hardened runtime configuration with typed properties and actuator rules.
+
+Tasks:
+- E8.1 Typed properties
+  - Introduce `@ConfigurationProperties` classes for app-specific settings; add validation annotations.
+- E8.2 Profiles and env vars
+  - Prefer env vars for environment differences; document mapping.
+- E8.3 Actuator exposure
+  - Expose `/actuator/health`, `/info`, `/metrics` anonymously; secure the rest; document non-prod relaxations.
+
+Exit criteria:
+- App fails fast on invalid config; actuator endpoints follow policy.
+
+---
+
+## Epic 9 — Internationalization (M6–M7)
+
+Goal: Externalize user-facing messages and support future locales.
+
+Tasks:
+- E9.1 Backend messages
+  - Externalize validation and error messages into `messages.properties` (and future `messages_{locale}.properties`).
+- E9.2 Frontend i18n readiness
+  - Introduce a light i18n layer (e.g., `i18next`) for strings in UI; keep keys in resource files.
+
+Exit criteria:
+- No hard-coded end-user copy in controllers or core UI components.
+
+---
+
+## Epic 10 — Testing Strategy (M5)
+
+Goal: Confidence via unit, integration, and e2e-level checks.
+
+Tasks:
+- E10.1 Backend unit & slice tests
+  - Services with constructor injection; use Mockito if needed; repositories with `@DataJpaTest`.
+- E10.2 Integration tests with Testcontainers
+  - Use Postgres container; start app on random port with `@SpringBootTest(webEnvironment = RANDOM_PORT)`.
+- E10.3 Frontend tests
+  - Vitest + RTL: component and hook tests; mock network with MSW.
+- E10.4 Contract checks
+  - Validate OpenAPI responses format (ProblemDetails on error paths) with tests.
+
+Exit criteria:
+- CI runs tests reliably in parallel agents; random port prevents conflicts.
+
+---
+
+## Epic 11 — Logging & Observability (M5–M6)
+
+Goal: Actionable logs and metrics with privacy and performance in mind.
+
+Tasks:
+- E11.1 SLF4J usage only
+  - Remove `System.out.println`; guard expensive debug logs; no sensitive data in logs.
+- E11.2 MDC & correlation (optional)
+  - Add request correlation IDs to logs; surface in frontend error reports if feasible.
+- E11.3 Metrics
+  - Ensure key metrics via Micrometer; expose through `/actuator/metrics`.
+
+Exit criteria:
+- Clean structured logging; basic metrics visible.
+
+---
+
+## Epic 12 — CI/CD & Release (M5–M6)
+
+Goal: Reproducible builds and deploy artifacts.
+
+Tasks:
+- E12.1 CI pipeline
+  - Steps: checkout → JDK 21 → cache Maven & npm → `openapi/npm ci && npm test` → `mvn -Pwith-frontend -B clean verify` → publish artifacts.
+- E12.2 Static analysis
+  - Add code quality gates (SpotBugs, Checkstyle or Spring Java format, ESLint). Fail build on critical issues.
+- E12.3 Release artifacts
+  - Attach the fat JAR and optionally the bundled OpenAPI `dist/bundle.yaml`.
+
+Exit criteria:
+- CI green with caching; artifacts uploaded; linting enforced.
+
+---
+
+## Epic 13 — Developer Documentation (M7)
+
+Goal: Keep the team fast and aligned.
+
+Tasks:
+- E13.1 Frontend guide
+  - Keep `prompts/requirements.md` as the definitive frontend guide. Link from `README.md`.
+- E13.2 Repo `README.md`
+  - Update with: quick start, build commands, profiles, OpenAPI workflow, testing, and troubleshooting (ports, Node version, OS notes).
+- E13.3 `.junie/guidelines.md`
+  - Document the day-to-day workflow for contributors (branching, commit messages, code review checklist).
+
+Exit criteria:
+- New devs can set up and contribute in <1 hour.
+
+---
+
+## Acceptance Criteria (Global)
+
+- Build: `mvn -Pwith-frontend clean package` produces a runnable JAR serving the React build under `/` and APIs under `/api/*` (or current mapping).
+- Spec: `openapi/npm test` passes; `npm run api:gen` generates clients with no compile errors.
+- Quality: ESLint, Prettier, Vitest tests pass locally and in CI.
+- Backend: DTOs used at controller boundaries; services are transactional; OSIV disabled; Flyway migrations auto-apply; global exception handler returns `ProblemDetails`.
+- Security/Ops: Actuator exposure policy enforced; configuration bound to typed properties with validation.
+
+---
+
+## Risks & Mitigations
+
+- Risk: Divergence between spec and implementation → Mitigation: contract-first flow; PR checklist requires spec and client regeneration.
+- Risk: Node/NPM or plugin version drift → Mitigation: pin versions in Maven profile and `.nvmrc`/`.tool-versions` (optional) and document in README.
+- Risk: OSIV disablement causing lazy-load errors → Mitigation: audit queries; add fetch joins/projections; write tests that serialize responses.
+- Risk: CI flakiness due to ports/containers → Mitigation: random ports; dependency container reuse; backoff in tests.
+
+---
+
+## Work Breakdown Example (First 2 Weeks)
+
+Week 1
+- Verify and adjust Vite output path, Tailwind setup, scripts (E1.1–E1.2).
+- Run `mvn -Pwith-frontend clean package`; fix any path or plugin issues (E1.3).
+- Add/verify `.gitignore` entries (E1.5).
+- Run Redocly lint; fix spec warnings; write `openapi/README` (E2.1).
+
+Week 2
+- Implement `api:gen` flow; choose generator; integrate with services (E2.2, E4.1).
+- Scaffold AppLayout + Router; placeholder pages (E3.1–E3.2).
+- Create beers service + `useBeers` hook and list page skeleton (E4.2–E5.1 initial).
+
+---
+
+## Repository Touchpoints (for implementers)
+
+- Backend Java: `src/main/java/**` (controllers, services, mappers, DTOs), `src/main/resources/application-*.properties`, `db/migration`.
+- Frontend: `src/main/frontend/**` (vite config, package.json, src/app, src/services, src/hooks, src/lib/api).
+- OpenAPI: `openapi/openapi/openapi.yaml` plus modular files; `openapi/package.json` scripts.
+- Build: `pom.xml` profile `with-frontend`.
+- Docs: `README.md`, `prompts/requirements.md`, `prompts/plan.md`, `.junie/guidelines.md`.
+
+---
+
+## Definition of Done (per PR)
+
+- Adheres to the Spring Boot and REST guidelines.
+- Includes or updates OpenAPI as needed; clients regenerated.
+- Unit/integration tests updated; Vitest tests for UI changes.
+- Logging and configuration follow standards; no sensitive data in logs.
+- Documentation updated where relevant.

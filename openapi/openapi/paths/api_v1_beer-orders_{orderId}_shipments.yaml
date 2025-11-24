@@ -2,6 +2,7 @@ get:
   tags:
     - BeerOrder
   summary: List shipments for a beer order
+  operationId: listBeerOrderShipments
   parameters:
     - name: orderId
       in: path
@@ -48,10 +49,13 @@ get:
                 type: integer
               number:
                 type: integer
+    '400':
+      $ref: '../components/responses/Problem.yaml'
 post:
   tags:
     - BeerOrder
   summary: Create a shipment for a beer order
+  operationId: createBeerOrderShipment
   parameters:
     - name: orderId
       in: path

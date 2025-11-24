@@ -41,63 +41,7 @@ Write the plan to `prompts/plan.md` file.
 Based on the `requirementsLee.md` file, here is a generated prompt to create an implementation plan:
 
 
-Based on the file `prompts/requirementsLee.md`, generate a detailed implementation plan for creating the React frontend for the Spring Boot project. The plan should be structured as a series of epics, with each epic broken down into smaller, actionable user stories or tasks. The goal is to create a clear roadmap for a development team to follow.
-
-The implementation plan should cover the following key areas, as detailed in the requirements document:
-
-1.  **Project Foundation & Setup:**
-    *   Create the initial React project with Vite and TypeScript in the `src/main/frontend` directory.
-    *   Install all necessary dependencies for the core application, UI libraries (Tailwind CSS, shadcn, Radix), tooling, and testing.
-    *   Initialize and configure Tailwind CSS and shadcn UI.
-
-2.  **Build Integration & Configuration:**
-    *   Configure Vite for the development environment, including setting up the proxy to the Spring Boot backend.
-    *   Configure Vite for production builds, ensuring output is directed to `src/main/resources/static`.
-    *   Integrate the frontend build into the Maven lifecycle using the `frontend-maven-plugin` for dependency installation and building.
-    *   Configure the `maven-clean-plugin` to handle the cleanup of generated frontend assets.
-    *   Set up `package.json` scripts for development, building, testing, and API client generation.
-
-3.  **API Integration & Data Layer:**
-    *   Generate the TypeScript API client and types from the OpenAPI specification (`openapi/openapi/openapi.yaml`).
-    *   Implement a reusable Axios instance with global interceptors for API calls and error handling.
-    *   Create a service layer with modules for each resource (Beers, Customers, Beer Orders), encapsulating data-fetching logic.
-
-4.  **Application Architecture & UI Shell:**
-    *   Implement the main application routing using React Router, including a nested layout structure.
-    *   Develop a shared `AppLayout` component for consistent navigation and structure across pages.
-    *   Create custom hooks (e.g., `useBeers`) to manage state, loading, and errors for data fetching.
-
-5.  **Feature Implementation (CRUD per Resource):**
-    *   For **Beers**, create components and pages for:
-        *   Listing all beers with pagination.
-        *   Viewing beer details.
-        *   Creating, updating, and deleting beers using forms and dialogs.
-    *   For **Customers**, create components and pages for:
-        *   Listing all customers.
-        *   Viewing customer details.
-        *   Creating, updating, and deleting customers.
-    *   For **Beer Orders**, create components and pages for:
-        *   Listing all orders.
-        *   Viewing order details.
-        *   Creating and updating orders.
-
-6.  **Quality & Testing:**
-    *   Set up the testing environment using Vitest and React Testing Library.
-    *   Configure ESLint and Prettier to enforce code quality and consistent style.
-    *   Write unit and integration tests for key components, hooks, and services.
-
-7.  **Documentation & Workflow:**
-    *   Document the frontend development workflow in `.junie/guidelines.md`.
-    *   Verify and document the local development process (concurrently running backend and frontend) and the production build process.
-
-Please ensure the plan is logical, sequential, and provides enough detail for developers to understand the scope of each task.
-Write the plan to `prompts/plan.md` file.
-
-
-
-
-
-
+Based on the file `prompts/requirements.md`, generate a detailed implementation plan for creating the React frontend for the Spring Boot project. The plan should be structured as a series of epics, with each epic broken down into smaller, actionable user stories or tasks. The goal is to create a clear roadmap for a development team to follow.
 
 
 
@@ -163,22 +107,51 @@ Write the task list to `prompts/tasks.md` file.
 
 -------------------------------------
 
-Complete the task list `prompts/tasks.md`. Use information from `prompts/requirementsLee.md` and `prompts/plan.md` for
+Complete the task list `prompts/tasks.md`. Use information from `prompts/requirements.md` and `prompts/plan.md` for
 additional context when completing the tasks.
 
 Implement the tasks in the task list. Focus on completing the tasks in order. Mark the task complete as it is done
 using [x]. As each step is completed, it is very important to update the task list mark and the task as done [x]. 
 
+Complete the task list `prompts/assignment4/tasks.md`. Inspect the requirements.md and plan.md and task.md (task list).
+Implement the remaining tasks that have a place holder [ ]. Mark the task complete as it is done
+using [x]. As each step is completed, it is very important to update the task list mark and the task as done [x].
+
+-----------------------------------
+**RUN THIS IN ASK MODE**
+Inspect the files `prompts/requirements.md` and `prompts/plan.md`. These changes have been implemented in the project.
+Review the project as needed. Plan additional sections in the guideline.md file for the changes which have been 
+implemented in the project. Include instructions for the project structure, and for building and testing the frontend project.
+Also identify any best practices used for the front end code.
+
+
+Inspect the files `prompts/requirements.md` and `prompts/plan.md`. These changes have been implemented in the project.
+Review the project as needed. Implement the remaining tasks that have a place holder [ ]. Mark the task complete as it is done
+using [x]. As each step is completed, it is very important to update the task list mark and the task as done [x].
+-----------------------------------
+**CHANGE BACK TO CODE MODE**
+The frontend project has build errors. Fix errors, verify tests are passing.
+
+-----------------------------------
+
+The command `npm test` is failing, fix test errors, verify all tests are passing
+
+-----------------------------------
+
+The command `npm line` is shows lint errors, inspect the lint errors and fix, verify there are no lint errors
+
+-----------------------------------
+Update eslint configuration to disable the warning for `Unused eslint-disable directive`
 
 
 
 
+The frontend project has build errors. 
 
 
-
-
-
-
+Inspect the files `prompts/requirements.md` and `prompts/plan.md`. These changes have been implemented in the project.
+Review the project as needed. Implement the remaining tasks
+Frontend Beers pages & components: list (with filtering/pagination if supported), detail, create/edit forms, delete flows, optimistic UX.
 
 
 

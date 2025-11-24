@@ -2,9 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import axiosLib from 'axios';
+import axios from 'axios';
 import type { AxiosError, AxiosRequestConfig, AxiosResponse, AxiosInstance } from 'axios';
-import { api as defaultApiClient } from '../../axios';
 import FormData from 'form-data';
 
 import { ApiError } from './ApiError';
@@ -208,7 +207,7 @@ export const sendRequest = async <T>(
     onCancel: OnCancel,
     axiosClient: AxiosInstance
 ): Promise<AxiosResponse<T>> => {
-    const source = axiosLib.CancelToken.source();
+    const source = axios.CancelToken.source();
 
     const requestConfig: AxiosRequestConfig = {
         url,
@@ -291,7 +290,7 @@ export const catchErrorCodes = (options: ApiRequestOptions, result: ApiResult): 
  * @returns CancelablePromise<T>
  * @throws ApiError
  */
-export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions, axiosClient: AxiosInstance = defaultApiClient): CancelablePromise<T> => {
+export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions, axiosClient: AxiosInstance = axios): CancelablePromise<T> => {
     return new CancelablePromise(async (resolve, reject, onCancel) => {
         try {
             const url = getUrl(config, options);

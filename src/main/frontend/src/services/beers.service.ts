@@ -46,7 +46,7 @@ export async function listBeers(params: ListBeersParams): Promise<Page<BeerDTO>>
 
 export async function getBeer(id: number): Promise<BeerDTO> {
   try {
-    return await BeerService.getBeer({ id }) as any
+    return (await BeerService.getBeerById({ id })) as any
   } catch (e) {
     throw normalizeError(e)
   }

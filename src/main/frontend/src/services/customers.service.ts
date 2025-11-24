@@ -1,4 +1,5 @@
 import { CustomerService } from '../lib/api'
+import '../lib/api/config'
 import { normalizeError } from '../lib/axios'
 
 export type Page<T> = {

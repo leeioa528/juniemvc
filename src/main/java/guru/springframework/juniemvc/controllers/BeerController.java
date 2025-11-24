@@ -28,10 +28,10 @@ class BeerController {
      * Get beers with pagination and optional beanName and beerStyle filters.
      */
     @GetMapping
-    Page<BeerDto> getBeers(@RequestParam(value = "beanName", required = false) String beanName,
+    ResponseEntity<Page<BeerDto>> getBeers(@RequestParam(value = "beanName", required = false) String beanName,
                            @RequestParam(value = "beerStyle", required = false) String beerStyle,
                            Pageable pageable) {
-        return beerService.getBeers(beanName, beerStyle, pageable);
+        return ResponseEntity.ok(beerService.getBeers(beanName, beerStyle, pageable));
     }
 
     /**
